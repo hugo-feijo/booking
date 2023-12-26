@@ -1,6 +1,6 @@
 package com.hostfully.interview.model.dto;
 
-import com.hostfully.interview.exception.DtoNotValidException;
+import com.hostfully.interview.exception.BadRequestException;
 import com.hostfully.interview.model.entity.Property;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,7 +24,7 @@ public class PropertyCreateDto {
 
     public boolean validateName() {
         if (name == null || name.isEmpty()){
-            throw new DtoNotValidException("Property name is required");
+            throw new BadRequestException("Property name is required");
         }
         return true;
     }

@@ -1,5 +1,6 @@
 package com.hostfully.interview.service;
 
+import com.hostfully.interview.exception.BadRequestException;
 import com.hostfully.interview.model.dto.PropertyCreateDto;
 import com.hostfully.interview.model.entity.Property;
 import com.hostfully.interview.repository.PropertyRepository;
@@ -25,6 +26,6 @@ public class PropertyService {
         var uuid = UUID.fromString(id);
 
         return propertyRepository.findById(uuid)
-                .orElseThrow(() -> new RuntimeException("Property not found"));
+                .orElseThrow(() -> new BadRequestException("Bad Request"));
     }
 }

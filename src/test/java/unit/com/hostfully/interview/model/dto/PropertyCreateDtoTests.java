@@ -1,6 +1,6 @@
 package unit.com.hostfully.interview.model.dto;
 
-import com.hostfully.interview.exception.DtoNotValidException;
+import com.hostfully.interview.exception.BadRequestException;
 import com.hostfully.interview.model.dto.PropertyCreateDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -30,21 +30,21 @@ class PropertyCreateDtoTests {
 	@Test
 	void validateName_NullName_ThrowsException() {
 		var dto = new PropertyCreateDto();
-		var exception = Assertions.assertThrows(DtoNotValidException.class, dto::validateName);
+		var exception = Assertions.assertThrows(BadRequestException.class, dto::validateName);
 		Assertions.assertEquals("Property name is required", exception.getMessage());
 	}
 
 	@Test
 	void validateName_BlankName_ThrowsException() {
 		var dto = new PropertyCreateDto("");
-		var exception = Assertions.assertThrows(DtoNotValidException.class, dto::validateName);
+		var exception = Assertions.assertThrows(BadRequestException.class, dto::validateName);
 		Assertions.assertEquals("Property name is required", exception.getMessage());
 	}
 
 	@Test
 	void validateName_EmptyName_ThrowsException() {
 		var dto = new PropertyCreateDto("");
-		var exception = Assertions.assertThrows(DtoNotValidException.class, dto::validateName);
+		var exception = Assertions.assertThrows(BadRequestException.class, dto::validateName);
 		Assertions.assertEquals("Property name is required", exception.getMessage());
 	}
 

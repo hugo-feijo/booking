@@ -10,4 +10,8 @@ public class ErrorInfoDto {
     public ErrorInfoDto(Exception ex) {
         this.message = ex.getMessage();
     }
+
+    public ErrorInfoDto(String message) {
+        this.message = message;
+    }
 }
