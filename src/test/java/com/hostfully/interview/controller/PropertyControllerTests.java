@@ -16,8 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -71,6 +70,30 @@ class PropertyControllerTests {
         Assertions.assertEquals(0, propertyRepository.findAll().size());
     }
 
+    @Test
+    public void getProperty_InvalidUUID_BadRequestIsThrows() throws Exception {
+        propertyRepository.save(new Property(null, "Property name"));
+
+        mockMvc.perform(get("/properties/" + "invalid-uuid")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Bad Request")));
+
+        Assertions.assertEquals(1, propertyRepository.findAll().size());
+    }
+
+    @Test
+    public void getProperty_IdNonexistent_Return400() throws Exception {
+        propertyRepository.save(new Property(null, "Property name"));
+
+        mockMvc.perform(get("/properties/" + UUID.randomUUID())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Bad Request")));
+
+        Assertions.assertEquals(1, propertyRepository.findAll().size());
+    }
+
 
     @Test
     @Sql("classpath:/sql/insert-property.sql")
@@ -81,5 +104,45 @@ class PropertyControllerTests {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
 
         Assertions.assertEquals(3, propertyRepository.findAll().size());
+    }
+
+    @Test
+    public void deleteProperty_ValidId_EntityIsDeleted() throws Exception {
+        var property =  propertyRepository.save(new Property(null, "Property name"));
+
+        Assertions.assertEquals(1, propertyRepository.findAll().size());
+
+        mockMvc.perform(delete("/properties/" + property.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        Assertions.assertEquals(0, propertyRepository.findAll().size());
+    }
+
+    @Test
+    public void deleteProperty_InvalidUUID_BadRequestIsThrows() throws Exception {
+        var property =  propertyRepository.save(new Property(null, "Property name"));
+
+        Assertions.assertEquals(1, propertyRepository.findAll().size());
+
+        mockMvc.perform(delete("/properties/" + "invalid-uuid")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Bad Request")));
+
+        Assertions.assertEquals(1, propertyRepository.findAll().size());
+    }
+
+    @Test
+    public void deleteProperty_IdNonexistent_Return204() throws Exception {
+        propertyRepository.save(new Property(null, "Property name"));
+
+        Assertions.assertEquals(1, propertyRepository.findAll().size());
+
+        mockMvc.perform(delete("/properties/" + UUID.randomUUID())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        Assertions.assertEquals(1, propertyRepository.findAll().size());
     }
 }

@@ -24,7 +24,7 @@ public class PropertyService {
     }
 
     public Property getProperty(String id) {
-        var uuid = UUID.fromString(id);
+        var uuid = validUUID(id);
 
         return propertyRepository.findById(uuid)
                 .orElseThrow(() -> new BadRequestException("Bad Request"));
@@ -32,5 +32,19 @@ public class PropertyService {
 
     public List<Property> findAllProperties() {
         return propertyRepository.findAll();
+    }
+
+    public void deleteProperty(String id) {
+        var uuid = validUUID(id);
+
+        propertyRepository.deleteById(uuid);
+    }
+
+    public UUID validUUID(String id) {
+        try {
+            return UUID.fromString(id);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Bad Request");
+        }
     }
 }
