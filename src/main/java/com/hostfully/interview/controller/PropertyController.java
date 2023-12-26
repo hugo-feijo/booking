@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/properties")
 public class PropertyController {
@@ -21,6 +23,12 @@ public class PropertyController {
     public Property getProperty(@PathVariable("id") String id) {
         return propertyService.getProperty(id);
     }
+
+    @GetMapping
+    public List<Property> getAllProperties() {
+        return propertyService.findAllProperties();
+    }
+
     @PostMapping
     public ResponseEntity<Property> createProperty(@RequestBody PropertyCreateDto propertyCreateDto) {
         var entity = propertyService.createProperty(propertyCreateDto);
