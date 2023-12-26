@@ -145,4 +145,60 @@ class PropertyControllerTests {
 
         Assertions.assertEquals(1, propertyRepository.findAll().size());
     }
+
+    @Test
+    public void updateProperty_ValidId_EntityIsUpdated() throws Exception {
+        var property =  propertyRepository.save(new Property(null, "Property name"));
+
+        var propertyCreateDto = new PropertyCreateDto("Property name updated");
+
+        mockMvc.perform(put("/properties/" + property.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(propertyCreateDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("name", is(propertyCreateDto.getName())));
+
+        Assertions.assertEquals(propertyCreateDto.getName(), propertyRepository.findById(property.getId()).get().getName());
+    }
+
+    @Test
+    public void updateProperty_InvalidUUID_BadRequestIsThrows() throws Exception {
+        var propertyCreateDto = new PropertyCreateDto("Property name updated");
+
+        mockMvc.perform(put("/properties/" + "invalid-uuid")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(propertyCreateDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Bad Request")));
+
+    }
+
+    @Test
+    public void updateProperty_IdNonexistent_Return400() throws Exception {
+        var propertyCreateDto = new PropertyCreateDto("Property name updated");
+
+        mockMvc.perform(put("/properties/" + UUID.randomUUID())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(propertyCreateDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Bad Request")));
+
+    }
+
+    @Test
+    public void updateProperty_InvalidPropertyName_Return400() throws Exception {
+        var propertyCreateDto = new PropertyCreateDto(null);
+
+        mockMvc.perform(put("/properties/" + UUID.randomUUID())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(propertyCreateDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Property name is required")));
+
+    }
 }

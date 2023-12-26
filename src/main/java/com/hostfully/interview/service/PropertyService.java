@@ -47,4 +47,11 @@ public class PropertyService {
             throw new BadRequestException("Bad Request");
         }
     }
+
+    public Property updateProperty(String id, PropertyCreateDto propertyCreateDto) {
+        propertyCreateDto.validate();
+        var oldProperty = getProperty(id);
+        oldProperty.setName(propertyCreateDto.getName());
+        return propertyRepository.save(oldProperty);
+    }
 }

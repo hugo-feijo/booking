@@ -35,6 +35,12 @@ public class PropertyController {
         return ResponseEntity.status(HttpStatus.CREATED).body(entity);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Property> updateProperty(@PathVariable("id") String id, @RequestBody PropertyCreateDto propertyCreateDto) {
+        var entity = propertyService.updateProperty(id, propertyCreateDto);
+        return ResponseEntity.status(HttpStatus.OK).body(entity);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteProperty(@PathVariable("id") String id) {
         propertyService.deleteProperty(id);
