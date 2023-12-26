@@ -3,6 +3,8 @@ package com.hostfully.interview.controller;
 import com.hostfully.interview.model.dto.PropertyCreateDto;
 import com.hostfully.interview.model.entity.Property;
 import com.hostfully.interview.service.PropertyService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,7 +22,8 @@ public class PropertyController {
         return propertyService.getProperty(id);
     }
     @PostMapping
-    public Property createProperty(@RequestBody PropertyCreateDto propertyCreateDto) {
-        return propertyService.createProperty(propertyCreateDto);
+    public ResponseEntity<Property> createProperty(@RequestBody PropertyCreateDto propertyCreateDto) {
+        var entity = propertyService.createProperty(propertyCreateDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(entity);
     }
 }
