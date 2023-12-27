@@ -41,25 +41,22 @@ public class BookingCreateDto {
         }
 
         if(!valid) {
-            throw new BadRequestException("Bad Request");
+            throw new BadRequestException("Property ID is required and must be a valid UUID");
         }
 
         return valid;
     }
 
-    public Booking toBooking(Property property) {
-        var booking = new Booking();
-        booking.setProperty(property);
-        booking.setStartDate(startDate);
-        booking.setEndDate(endDate);
-        return booking;
-    }
-
     public boolean validateDates() {
         var valid = startDate != null && endDate != null && startDate.isBefore(endDate);
+        var errorMessage = "Bad Request";
+
+        if(startDate == null) errorMessage = "Start date is required";
+        if(endDate == null) errorMessage = "End date is required";
+        if(startDate != null && endDate != null && startDate.isAfter(endDate)) errorMessage = "Start date must be before end date";
 
         if(!valid) {
-            throw new BadRequestException("Bad Request");
+            throw new BadRequestException(errorMessage);
         }
 
         return valid;

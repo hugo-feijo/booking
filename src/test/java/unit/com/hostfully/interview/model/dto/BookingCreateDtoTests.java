@@ -25,8 +25,6 @@ public class BookingCreateDtoTests {
         MockitoAnnotations.openMocks(this);
     }
 
-
-
     @Test
     void validate_ValidDto_CallsAllValidateMethods() {
         dto.setPropertyId(UUID.randomUUID().toString());
@@ -74,7 +72,7 @@ public class BookingCreateDtoTests {
         dto.setEndDate(LocalDate.now().plusDays(1));
 
         var exception = assertThrows(BadRequestException.class, () -> dto.validateDates());
-        assertEquals("Bad Request", exception.getMessage());
+        assertEquals("Start date is required", exception.getMessage());
     }
 
     @Test
@@ -84,7 +82,7 @@ public class BookingCreateDtoTests {
         dto.setEndDate(null);
 
         var exception = assertThrows(BadRequestException.class, () -> dto.validateDates());
-        assertEquals("Bad Request", exception.getMessage());
+        assertEquals("End date is required", exception.getMessage());
     }
 
     @Test
@@ -94,6 +92,6 @@ public class BookingCreateDtoTests {
         dto.setEndDate(LocalDate.now());
 
         var exception = assertThrows(BadRequestException.class, () -> dto.validateDates());
-        assertEquals("Bad Request", exception.getMessage());
+        assertEquals("Start date must be before end date", exception.getMessage());
     }
 }

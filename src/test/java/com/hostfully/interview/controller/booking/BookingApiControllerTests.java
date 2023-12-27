@@ -5,6 +5,7 @@ import com.hostfully.interview.model.dto.BookingCreateDto;
 import com.hostfully.interview.model.dto.PropertyCreateDto;
 import com.hostfully.interview.model.entity.BookingStatus;
 import com.hostfully.interview.model.entity.Property;
+import com.hostfully.interview.repository.BookingRepository;
 import com.hostfully.interview.repository.PropertyRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -30,16 +31,20 @@ class BookingApiControllerTests {
     @Autowired
     private MockMvc mockMvc;
 
-//    @Autowired
-//    private PropertyRepository propertyRepository;
+    @Autowired
+    private PropertyRepository propertyRepository;
+
+    @Autowired
+    private BookingRepository bookingRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
 
-//    @AfterEach
-//    void setUp() {
-//        propertyRepository.deleteAll();
-//    }
+    @AfterEach
+    void setUp() {
+        bookingRepository.deleteAll();
+        propertyRepository.deleteAll();
+    }
 
     //TODO: test blocking scenario
 
@@ -70,7 +75,7 @@ class BookingApiControllerTests {
                         .content(objectMapper.writeValueAsString(bookingCreateDto))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("message", is("Bad Request")));
+                .andExpect(jsonPath("message", is("Property ID is required and must be a valid UUID")));
     }
     @Test
     public void createProperty_NonexistentProperty_BadRequestIsThrows() throws Exception {
@@ -93,7 +98,7 @@ class BookingApiControllerTests {
                         .content(objectMapper.writeValueAsString(bookingCreateDto))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("message", is("Bad Request")));
+                .andExpect(jsonPath("message", is("Property ID is required and must be a valid UUID")));
     }
 
     @Test
@@ -105,7 +110,7 @@ class BookingApiControllerTests {
                         .content(objectMapper.writeValueAsString(bookingCreateDto))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("message", is("Bad Request")));
+                .andExpect(jsonPath("message", is("Start date is required")));
     }
 
     @Test
@@ -117,7 +122,7 @@ class BookingApiControllerTests {
                         .content(objectMapper.writeValueAsString(bookingCreateDto))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("message", is("Bad Request")));
+                .andExpect(jsonPath("message", is("End date is required")));
     }
     @Test
     @Sql(scripts = "/sql/insert-property.sql")
@@ -129,6 +134,6 @@ class BookingApiControllerTests {
                         .content(objectMapper.writeValueAsString(bookingCreateDto))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("message", is("Bad Request")));
+                .andExpect(jsonPath("message", is("Start date must be before end date")));
     }
 }
