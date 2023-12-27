@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hostfully.interview.model.dto.PropertyCreateDto;
 import com.hostfully.interview.model.entity.Property;
 import com.hostfully.interview.repository.PropertyRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,6 +33,11 @@ class PropertyApiControllerTests {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @AfterEach
+    void setUp() {
+        propertyRepository.deleteAll();
+    }
 
     @Test
     public void createProperty_ValidProperty_EntityIsReturnedAndInserted() throws Exception {
