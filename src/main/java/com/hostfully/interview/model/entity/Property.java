@@ -24,8 +24,8 @@ public class Property {
     @Id
     private UUID id;
 
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @Schema(description = "Property name", example = "New Unit", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty
     private String name;
+    //TODO: add created and updated date
 }

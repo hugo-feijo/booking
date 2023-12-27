@@ -18,6 +18,7 @@ public class PropertyService {
         this.propertyRepository = propertyRepository;
     }
 
+    //TODO: extract toEntity method
     public Property createProperty(PropertyCreateDto propertyCreateDto) {
         propertyCreateDto.validate();
         return propertyRepository.save(propertyCreateDto.toEntity());
