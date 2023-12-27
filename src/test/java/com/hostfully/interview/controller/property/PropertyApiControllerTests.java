@@ -1,4 +1,4 @@
-package com.hostfully.interview.controller;
+package com.hostfully.interview.controller.property;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hostfully.interview.model.dto.PropertyCreateDto;
@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-class PropertyControllerTests {
+class PropertyApiControllerTests {
 
     @Autowired
     private MockMvc mockMvc;

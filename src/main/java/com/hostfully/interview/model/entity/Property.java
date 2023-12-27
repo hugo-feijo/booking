@@ -1,6 +1,7 @@
 package com.hostfully.interview.model.entity;
 
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,10 +18,14 @@ import java.util.UUID;
 @Entity
 public class Property {
 
-    @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Schema(description = "Property id", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    @Id
     private UUID id;
 
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Schema(description = "Property name", example = "New Unit", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty
     private String name;
 }
