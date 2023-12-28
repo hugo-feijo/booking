@@ -136,4 +136,33 @@ class BookingApiControllerTests {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("message", is("Start date must be before end date")));
     }
+
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
+    public void createProperty_BookingOverlapping_BadRequestIsThrows() throws Exception {
+        var startDate = LocalDate.of(2023, 1, 5);
+        var endDate = LocalDate.of(2023, 1, 15);
+        var propertyId = "555a2254-e8ff-4005-ada2-4d478b04a5d7";
+        var bookingCreateDto = new BookingCreateDto(propertyId, startDate, endDate);
+
+        mockMvc.perform(post("/booking")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookingCreateDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("property.id", is(bookingCreateDto.getPropertyId())))
+                .andExpect(jsonPath("startDate", is(bookingCreateDto.getStartDate().toString())))
+                .andExpect(jsonPath("endDate", is(bookingCreateDto.getEndDate().toString())))
+                .andExpect(jsonPath("status", is(BookingStatus.CONFIRMED.toString())));
+
+        var bookingCreateDto2 = new BookingCreateDto(propertyId, startDate.plusDays(1), endDate.plusDays(1));
+
+        mockMvc.perform(post("/booking")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookingCreateDto2))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Dates already booked")));
+    }
 }

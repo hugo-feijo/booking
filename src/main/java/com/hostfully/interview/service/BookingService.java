@@ -1,5 +1,6 @@
 package com.hostfully.interview.service;
 
+import com.hostfully.interview.exception.BadRequestException;
 import com.hostfully.interview.model.dto.BookingCreateDto;
 import com.hostfully.interview.model.entity.Booking;
 import com.hostfully.interview.model.entity.BookingStatus;
@@ -22,7 +23,18 @@ public class BookingService {
     public Booking createBooking(BookingCreateDto bookingCreateDto) {
         bookingCreateDto.validate();
         var booking = bookingCreateDtoToBooking(bookingCreateDto);
+        validateBookingDates(bookingCreateDto);
         return bookingRepository.save(booking);
+    }
+
+    public boolean validateBookingDates(BookingCreateDto bookingCreateDto) {
+        var isBooked = bookingRepository.existByPropertyIdAndDateRange(bookingCreateDto.getPropertyId(), bookingCreateDto.getStartDate(), bookingCreateDto.getEndDate());
+
+        if(isBooked) {
+            throw new BadRequestException("Dates already booked");
+        }
+
+        return true;
     }
 
     public Booking bookingCreateDtoToBooking(BookingCreateDto bookingCreateDto) {

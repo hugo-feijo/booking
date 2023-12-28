@@ -43,7 +43,7 @@ public class BookingCreateDtoTests {
         dto.setEndDate(LocalDate.now().plusDays(1));
 
         var exception = assertThrows(BadRequestException.class, () -> dto.validatePropertyId());
-        assertEquals("Bad Request", exception.getMessage());
+        assertEquals("Property ID is required and must be a valid UUID", exception.getMessage());
     }
 
     @Test
@@ -52,7 +52,7 @@ public class BookingCreateDtoTests {
         dto.setEndDate(LocalDate.now().plusDays(1));
 
         var exception = assertThrows(BadRequestException.class, () -> dto.validatePropertyId());
-        assertEquals("Bad Request", exception.getMessage());
+        assertEquals("Property ID is required and must be a valid UUID", exception.getMessage());
     }
 
     @Test
@@ -62,7 +62,7 @@ public class BookingCreateDtoTests {
         dto.setEndDate(LocalDate.now().plusDays(1));
 
         var exception = assertThrows(BadRequestException.class, () -> dto.validatePropertyId());
-        assertEquals("Bad Request", exception.getMessage());
+        assertEquals("Property ID is required and must be a valid UUID", exception.getMessage());
     }
 
     @Test

@@ -52,6 +52,34 @@ public class BookingServiceTests {
     }
 
     @Test
+    void validateBookingDates_DateAlreadyBooked_ThrowsException() {
+        var startDate = LocalDate.of(2023, 1, 5);
+        var endDate = LocalDate.of(2023, 1, 15);
+        dto.setPropertyId(UUID.randomUUID().toString());
+        dto.setStartDate(startDate);
+        dto.setEndDate(endDate);
+
+        Mockito.when(bookingRepository.existByPropertyIdAndDateRange(dto.getPropertyId(), startDate, endDate)).thenReturn(true);
+
+        var exception = assertThrows(BadRequestException.class, () -> bookingService.validateBookingDates(dto));
+        assertEquals("Dates already booked", exception.getMessage());
+    }
+
+    @Test
+    void validateBookingDates_NoBookingFound_ReturnsTrue() {
+        var startDate = LocalDate.of(2023, 1, 5);
+        var endDate = LocalDate.of(2023, 1, 15);
+        dto.setPropertyId(UUID.randomUUID().toString());
+        dto.setStartDate(startDate);
+        dto.setEndDate(endDate);
+
+        Mockito.when(bookingRepository.existByPropertyIdAndDateRange(dto.getPropertyId(), startDate, endDate)).thenReturn(false);
+
+        var result = bookingService.validateBookingDates(dto);
+        assertTrue(result);
+    }
+
+    @Test
     void createBooking_ValidDto_ReturnsEntity() {
         var startDate = LocalDate.now();
         var endDate = LocalDate.now().plusDays(1);
@@ -62,10 +90,12 @@ public class BookingServiceTests {
 
         Mockito.when(propertyService.getProperty(dto.getPropertyId())).thenReturn(property);
         Mockito.when(bookingRepository.save(ArgumentMatchers.any(Booking.class))).thenReturn(booking);
+        Mockito.when(bookingRepository.existByPropertyIdAndDateRange(dto.getPropertyId(), startDate, endDate)).thenReturn(false);
 
         var newBooking = bookingService.createBooking(dto);
 
         Mockito.verify(dto, Mockito.times(1)).validate();
+        Mockito.verify(bookingRepository, Mockito.times(1)).existByPropertyIdAndDateRange(dto.getPropertyId(), startDate, endDate);
         assertEquals(property, newBooking.getProperty());
         assertEquals(dto.getStartDate(), newBooking.getStartDate());
         assertEquals(dto.getEndDate(), newBooking.getEndDate());
