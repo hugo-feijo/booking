@@ -261,6 +261,32 @@ class BookingApiControllerTests {
                 .andExpect(jsonPath("message", is("Booking not cancelled")));
     }
 
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
+    public void getBooking_ValidBooking_ReturnsBooking() throws Exception {
+        var booking = createBooking();
+
+        mockMvc.perform(get("/booking/{id}", booking.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("id", is(booking.getId().toString())))
+                .andExpect(jsonPath("status", is(BookingStatus.CONFIRMED.toString())));
+    }
+
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
+    public void getBooking_InvalidBookingId_ReturnsBadRequest() throws Exception {
+        var bookingId = UUID.randomUUID();
+
+        mockMvc.perform(get("/booking/{id}", bookingId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Bad Request")));
+    }
+
     private Booking createBooking() throws Exception {
         var startDate = LocalDate.of(2023, 1, 5);
         var endDate = LocalDate.of(2023, 1, 15);

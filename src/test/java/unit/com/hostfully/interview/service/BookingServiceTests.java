@@ -138,6 +138,26 @@ public class BookingServiceTests {
     }
 
     @Test
+    void getBooking_InvalidBookingId_ThrowsBadRequest() {
+        var bookingId = "invalid-booking-id";
+        Mockito.when(propertyService.validUUID(bookingId)).thenThrow(new BadRequestException("Bad Request"));
+
+        var exception = assertThrows(BadRequestException.class, () -> bookingService.getBooking(bookingId));
+        assertEquals("Bad Request", exception.getMessage());
+    }
+
+    @Test
+    void getBooking_ValidBookingId_ReturnsBooking() {
+        var bookingId = UUID.randomUUID();
+        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CONFIRMED, LocalDate.now(), null);
+        Mockito.when(propertyService.validUUID(bookingId.toString())).thenReturn(bookingId);
+        Mockito.when(bookingRepository.findById(bookingId)).thenReturn(java.util.Optional.of(booking));
+
+        var result = bookingService.getBooking(bookingId.toString());
+        assertEquals(booking, result);
+    }
+
+    @Test
     void cancelBooking_InvalidBookingId_ThrowsBadRequest() {
         var bookingId = "invalid-booking-id";
         Mockito.when(propertyService.validUUID(bookingId)).thenThrow(new BadRequestException("Bad Request"));
@@ -190,7 +210,7 @@ public class BookingServiceTests {
     }
 
     @Test
-    void rebokBooking_ValidBooking_ReturnsBookingRebooked() {
+    void rebookBooking_ValidBooking_ReturnsBookingRebooked() {
         var bookingId = UUID.randomUUID();
         var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CANCELLED, LocalDate.now(), null);
         Mockito.when(propertyService.validUUID(bookingId.toString())).thenReturn(bookingId);
