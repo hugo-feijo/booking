@@ -2,6 +2,7 @@ package com.hostfully.interview.controller.booking;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hostfully.interview.exception.BadRequestException;
 import com.hostfully.interview.model.dto.BookingCreateDto;
 import com.hostfully.interview.model.dto.PropertyCreateDto;
 import com.hostfully.interview.model.entity.Booking;
@@ -24,6 +25,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -281,6 +283,35 @@ class BookingApiControllerTests {
         var bookingId = UUID.randomUUID();
 
         mockMvc.perform(get("/booking/{id}", bookingId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Bad Request")));
+    }
+
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
+    public void deleteBooking_ValidBooking_ReturnsNoContent() throws Exception {
+        var booking = createBooking();
+
+        mockMvc.perform(delete("/booking/{id}", booking.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/booking/{id}", booking.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Bad Request")));
+    }
+
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
+    public void deleteBooking_InvalidBookingId_ReturnsBadRequest() throws Exception {
+        var bookingId = UUID.randomUUID();
+
+        mockMvc.perform(delete("/booking/{id}", bookingId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())

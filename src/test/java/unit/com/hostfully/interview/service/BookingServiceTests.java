@@ -220,4 +220,24 @@ public class BookingServiceTests {
         var cancelledBooking = bookingService.rebookBooking(bookingId.toString());
         assertEquals(BookingStatus.CONFIRMED, cancelledBooking.getStatus());
     }
+
+    @Test
+    void deleteBooking_InvalidBookingId_ThrowsBadRequest() {
+        var bookingId = "invalid-booking-id";
+        Mockito.when(propertyService.validUUID(bookingId)).thenThrow(new BadRequestException("Bad Request"));
+
+        var exception = assertThrows(BadRequestException.class, () -> bookingService.deleteBooking(bookingId));
+        assertEquals("Bad Request", exception.getMessage());
+    }
+
+    @Test
+    void deleteBooking_ValidBookingId_ReturnsBookingDeleted() {
+        var bookingId = UUID.randomUUID();
+        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CANCELLED, LocalDate.now(), null);
+        Mockito.when(propertyService.validUUID(bookingId.toString())).thenReturn(bookingId);
+        Mockito.when(bookingRepository.findById(bookingId)).thenReturn(java.util.Optional.of(booking));
+
+        bookingService.deleteBooking(bookingId.toString());
+        Mockito.verify(bookingRepository, Mockito.times(1)).delete(booking);
+    }
 }

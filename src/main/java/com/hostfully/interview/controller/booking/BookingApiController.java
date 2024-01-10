@@ -39,4 +39,10 @@ public class BookingApiController implements BookingApi {
         return ResponseEntity.ok(bookingService.getBooking(bookingId));
     }
 
+    @Override
+    public ResponseEntity<?> deleteBooking(String bookingId) {
+        bookingService.deleteBooking(bookingId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

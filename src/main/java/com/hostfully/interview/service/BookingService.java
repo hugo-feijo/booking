@@ -95,4 +95,9 @@ public class BookingService {
         }
         return true;
     }
+
+    public void deleteBooking(String bookingId) {
+        var booking = getBooking(bookingId);
+        bookingRepository.delete(booking);
+    }
 }

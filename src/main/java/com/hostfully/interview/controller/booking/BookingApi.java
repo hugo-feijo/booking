@@ -42,4 +42,11 @@ public interface BookingApi {
             @ApiResponse(responseCode = "400", description = "bad request", content = @Content(schema = @Schema(implementation = ErrorInfoDto.class)))})
     @GetMapping("/{id}")
     ResponseEntity<Booking> getBooking(@Parameter(description="Booking id") @PathVariable("id") String bookingId);
+
+    @Operation(summary = "Delete a Booking", description = "Delete a Booking", tags = {"booking"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "successful operation"),
+            @ApiResponse(responseCode = "400", description = "bad request", content = @Content(schema = @Schema(implementation = ErrorInfoDto.class)))})
+    @DeleteMapping("/{id}")
+    ResponseEntity<?> deleteBooking(@Parameter(description="Booking id")  @PathVariable("id") String bookingId);
 }
