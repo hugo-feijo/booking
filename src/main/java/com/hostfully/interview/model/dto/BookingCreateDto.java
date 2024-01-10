@@ -21,10 +21,10 @@ public class BookingCreateDto {
     @Schema(description = "Property ID (UUID) that this booking belongs", example = "c4eada6d-dbba-4be2-ad3b-92995154a682", requiredMode = Schema.RequiredMode.REQUIRED)
     private String propertyId;
 
-    @Schema(description = "When the booking start", example = "New Unit", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "When the booking start", example = "2021-01-10", requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDate startDate;
 
-    @Schema(description = "When the booking end", example = "New Unit", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "When the booking end", example = "2022-01-10", requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDate endDate;
 
     @Schema(description = "Guests that belongs to this booking", requiredMode = Schema.RequiredMode.REQUIRED)

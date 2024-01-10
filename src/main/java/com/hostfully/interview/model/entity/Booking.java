@@ -36,7 +36,7 @@ public class Booking {
     @NotNull
     private LocalDate startDate;
 
-    @Schema(description = "When the booking end", example = "2021-01-10", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "When the booking end", example = "2022-01-10", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     private LocalDate endDate;
 
