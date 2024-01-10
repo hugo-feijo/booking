@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hostfully.interview.exception.BadRequestException;
 import com.hostfully.interview.model.dto.BookingCreateDto;
+import com.hostfully.interview.model.dto.BookingUpdateDto;
 import com.hostfully.interview.model.dto.PropertyCreateDto;
 import com.hostfully.interview.model.entity.Booking;
 import com.hostfully.interview.model.entity.BookingStatus;
@@ -318,9 +319,110 @@ class BookingApiControllerTests {
                 .andExpect(jsonPath("message", is("Bad Request")));
     }
 
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
+    public void updateBooking_ValidBooking_ReturnsBookingUpdated() throws Exception {
+        var booking = createBooking();
+
+        var bookingUpdateDto = new BookingUpdateDto(LocalDate.now().plusDays(1), LocalDate.now().plusDays(2));
+
+        mockMvc.perform(put("/booking/{id}", booking.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookingUpdateDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("id", is(booking.getId().toString())))
+                .andExpect(jsonPath("status", is(BookingStatus.CONFIRMED.toString())))
+                .andExpect(jsonPath("startDate", is(bookingUpdateDto.getStartDate().toString())))
+                .andExpect(jsonPath("endDate", is(bookingUpdateDto.getEndDate().toString())));
+
+        var bookingUpdated = bookingRepository.findById(booking.getId()).get();
+        Assertions.assertEquals(BookingStatus.CONFIRMED, bookingUpdated.getStatus());
+        Assertions.assertEquals(bookingUpdateDto.getStartDate(), bookingUpdated.getStartDate());
+        Assertions.assertEquals(bookingUpdateDto.getEndDate(), bookingUpdated.getEndDate());
+    }
+
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
+    public void updateBooking_DatesInTheSameRange_ReturnsBookingUpdated() throws Exception {
+        var booking = createBooking();
+        var startDate = LocalDate.of(2023, 1, 10);
+        var endDate = LocalDate.of(2023, 1, 15);
+
+        var bookingUpdateDto = new BookingUpdateDto(startDate, endDate);
+
+        mockMvc.perform(put("/booking/{id}", booking.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookingUpdateDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("id", is(booking.getId().toString())))
+                .andExpect(jsonPath("status", is(BookingStatus.CONFIRMED.toString())))
+                .andExpect(jsonPath("startDate", is(bookingUpdateDto.getStartDate().toString())))
+                .andExpect(jsonPath("endDate", is(bookingUpdateDto.getEndDate().toString())));
+
+        var bookingUpdated = bookingRepository.findById(booking.getId()).get();
+        Assertions.assertEquals(BookingStatus.CONFIRMED, bookingUpdated.getStatus());
+        Assertions.assertEquals(bookingUpdateDto.getStartDate(), bookingUpdated.getStartDate());
+        Assertions.assertEquals(bookingUpdateDto.getEndDate(), bookingUpdated.getEndDate());
+    }
+
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
+    public void updateBooking_InvalidBookingId_ReturnsBadRequest() throws Exception {
+        var bookingId = UUID.randomUUID();
+        var bookingUpdateDto = new BookingUpdateDto(LocalDate.now().plusDays(1), LocalDate.now().plusDays(2));
+
+        mockMvc.perform(put("/booking/{id}", bookingId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookingUpdateDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Bad Request")));
+    }
+
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
+    public void updateBooking_InvalidDates_ReturnsBadRequest() throws Exception {
+        var booking = createBooking();
+
+        var bookingUpdateDto = new BookingUpdateDto(LocalDate.now().plusDays(2), LocalDate.now().plusDays(1));
+
+        mockMvc.perform(put("/booking/{id}", booking.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookingUpdateDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Start date must be before end date")));
+    }
+
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
+    public void updateBooking_BookingOverlapping_ReturnsBadRequest() throws Exception {
+        createBooking();
+        var startDate = LocalDate.of(2023, 2, 5);
+        var endDate = LocalDate.of(2023, 2, 15);
+        var booking = createBooking(startDate, endDate);
+        var bookingUpdateDto = new BookingUpdateDto(startDate.minusMonths(1), endDate.minusMonths(1));
+
+        mockMvc.perform(put("/booking/{id}", booking.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookingUpdateDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Dates already booked")));
+    }
+
     private Booking createBooking() throws Exception {
         var startDate = LocalDate.of(2023, 1, 5);
         var endDate = LocalDate.of(2023, 1, 15);
+
+        return createBooking(startDate, endDate);
+    }
+
+    private Booking createBooking(LocalDate startDate, LocalDate endDate) throws Exception {
         var propertyId = "555a2254-e8ff-4005-ada2-4d478b04a5d7";
         var bookingCreateDto = new BookingCreateDto(propertyId, startDate, endDate);
 

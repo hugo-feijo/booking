@@ -1,6 +1,7 @@
 package com.hostfully.interview.controller.booking;
 
 import com.hostfully.interview.model.dto.BookingCreateDto;
+import com.hostfully.interview.model.dto.BookingUpdateDto;
 import com.hostfully.interview.model.entity.Booking;
 import com.hostfully.interview.service.BookingService;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,11 @@ public class BookingApiController implements BookingApi {
     public ResponseEntity<?> deleteBooking(String bookingId) {
         bookingService.deleteBooking(bookingId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public ResponseEntity<Booking> updateBooking(String bookingId, BookingUpdateDto bookingUpdateDto) {
+        return ResponseEntity.ok(bookingService.updateBooking(bookingId, bookingUpdateDto));
     }
 
 }

@@ -1,6 +1,7 @@
 package com.hostfully.interview.controller.booking;
 
 import com.hostfully.interview.model.dto.BookingCreateDto;
+import com.hostfully.interview.model.dto.BookingUpdateDto;
 import com.hostfully.interview.model.dto.ErrorInfoDto;
 import com.hostfully.interview.model.entity.Booking;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,4 +50,11 @@ public interface BookingApi {
             @ApiResponse(responseCode = "400", description = "bad request", content = @Content(schema = @Schema(implementation = ErrorInfoDto.class)))})
     @DeleteMapping("/{id}")
     ResponseEntity<?> deleteBooking(@Parameter(description="Booking id")  @PathVariable("id") String bookingId);
+
+    @Operation(summary = "Update a Booking", description = "Update a Booking", tags = {"booking"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = Booking.class))),
+            @ApiResponse(responseCode = "400", description = "bad request", content = @Content(schema = @Schema(implementation = ErrorInfoDto.class)))})
+    @PutMapping("/{id}")
+    ResponseEntity<Booking> updateBooking(@Parameter(description="Booking id") @PathVariable("id") String bookingId, @RequestBody BookingUpdateDto bookingUpdateDto);
 }

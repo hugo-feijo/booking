@@ -16,10 +16,11 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
         SELECT exists(
             SELECT PROPERTY_ID FROM BOOKING
             WHERE PROPERTY_ID = ?1
-            AND START_DATE <= ?3
-            AND END_DATE >= ?2)
+            AND (ID != ?2 OR ?2 IS NULL)
+            AND START_DATE <= ?4
+            AND END_DATE >= ?3)
     """, nativeQuery = true)
-    boolean existByPropertyIdAndDateRange(String propertyId, LocalDate startDate, LocalDate endDate);
+    boolean existByPropertyIdAndDateRange(String propertyId, String bookingId, LocalDate startDate, LocalDate endDate);
 
     List<Booking> findAllByProperty(Property property);
 }
