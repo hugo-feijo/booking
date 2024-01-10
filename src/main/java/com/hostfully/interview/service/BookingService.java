@@ -8,6 +8,7 @@ import com.hostfully.interview.repository.BookingRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class BookingService {
@@ -48,5 +49,10 @@ public class BookingService {
         booking.setCreatedAt(LocalDate.now());
 
         return booking;
+    }
+
+    public List<Booking> getBookingsByPropertyId(String propertyId) {
+        var property = propertyService.getProperty(propertyId);
+        return bookingRepository.findAllByProperty(property);
     }
 }

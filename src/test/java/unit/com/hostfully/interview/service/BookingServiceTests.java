@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,14 +40,14 @@ public class BookingServiceTests {
     }
 
     @Test
-    void createBooking_NonExistingPropertyId_ThrowsException() {
-        dto.setPropertyId(UUID.randomUUID().toString());
+    void createBooking_InvalidPropertyId_ThrowsException() {
+        dto.setPropertyId("invalid-property-id");
         dto.setStartDate(LocalDate.now());
         dto.setEndDate(LocalDate.now().plusDays(1));
         Mockito.when(propertyService.getProperty(dto.getPropertyId())).thenThrow(new BadRequestException("Bad Request"));
 
         var exception = assertThrows(BadRequestException.class, () -> bookingService.createBooking(dto));
-        assertEquals("Bad Request", exception.getMessage());
+        assertEquals("Property ID is required and must be a valid UUID", exception.getMessage());
 
         Mockito.verify(dto, Mockito.times(1)).validate();
     }
@@ -115,5 +116,24 @@ public class BookingServiceTests {
         assertEquals(property, booking.getProperty());
         assertEquals(dto.getStartDate(), booking.getStartDate());
         assertEquals(dto.getEndDate(), booking.getEndDate());
+    }
+
+    @Test
+    void getBookingsByPropertyId_InvalidPropertyId_ThrowsBadRequest() {
+        var propertyId = "invalid-property-id";
+        Mockito.when(propertyService.getProperty(propertyId)).thenThrow(new BadRequestException("Bad Request"));
+
+        var exception = assertThrows(BadRequestException.class, () -> bookingService.getBookingsByPropertyId(propertyId));
+        assertEquals("Bad Request", exception.getMessage());
+    }
+
+    @Test
+    void getBookingsByPropertyId_ValidPropertyId_ReturnsBookings() {
+        var propertyId = UUID.randomUUID().toString();
+        Mockito.when(propertyService.getProperty(propertyId)).thenReturn(property);
+        Mockito.when(bookingRepository.findAllByProperty(property)).thenReturn(List.of(new Booking()));
+
+        var bookings = bookingService.getBookingsByPropertyId(propertyId);
+        assertEquals(1, bookings.size());
     }
 }

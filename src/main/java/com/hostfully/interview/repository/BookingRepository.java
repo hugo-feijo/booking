@@ -1,6 +1,7 @@
 package com.hostfully.interview.repository;
 
 import com.hostfully.interview.model.entity.Booking;
+import com.hostfully.interview.model.entity.Property;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -19,4 +20,6 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
             AND END_DATE >= ?2)
     """, nativeQuery = true)
     boolean existByPropertyIdAndDateRange(String propertyId, LocalDate startDate, LocalDate endDate);
+
+    List<Booking> findAllByProperty(Property property);
 }
