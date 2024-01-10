@@ -28,4 +28,11 @@ public interface BookingApi {
             @ApiResponse(responseCode = "400", description = "bad request", content = @Content(schema = @Schema(implementation = ErrorInfoDto.class)))})
     @PutMapping("/{id}/action/cancel")
     ResponseEntity<Booking> cancelBooking(@Parameter(description="Booking id") @PathVariable("id") String bookingId);
+
+    @Operation(summary = "Rebook a Booking", description = "Rebook a cancelled Booking", tags = {"booking"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = Booking.class))),
+            @ApiResponse(responseCode = "400", description = "bad request", content = @Content(schema = @Schema(implementation = ErrorInfoDto.class)))})
+    @PutMapping("/{id}/action/rebook")
+    ResponseEntity<Booking> rebookBooking(@Parameter(description="Booking id") @PathVariable("id") String bookingId);
 }

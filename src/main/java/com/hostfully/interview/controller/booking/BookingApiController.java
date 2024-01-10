@@ -29,4 +29,9 @@ public class BookingApiController implements BookingApi {
         return ResponseEntity.ok(bookingService.cancelBooking(bookingId));
     }
 
+    @Override
+    public ResponseEntity<Booking> rebookBooking(String bookingId) {
+        return ResponseEntity.ok(bookingService.rebookBooking(bookingId));
+    }
+
 }

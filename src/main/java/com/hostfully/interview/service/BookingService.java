@@ -63,7 +63,7 @@ public class BookingService {
 
     public Booking cancelBooking(String bookingId) {
         var booking = getBooking(bookingId);
-        validateBookingStatus(booking);
+        validateBookingForCancellation(booking);
 
         booking.setStatus(BookingStatus.CANCELLED);
         booking.setUpdateAt(LocalDate.now());
@@ -71,9 +71,27 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
-    private boolean validateBookingStatus(Booking booking) {
+    private boolean validateBookingForCancellation(Booking booking) {
         if(booking.getStatus().equals(BookingStatus.CANCELLED)) {
             throw new BadRequestException("Booking already cancelled");
+        }
+        return true;
+    }
+
+    public Booking rebookBooking(String bookingId) {
+        var booking = getBooking(bookingId);
+        validateBookingForRebooking(booking);
+
+        //TODO: check for blocked dates
+        booking.setStatus(BookingStatus.CONFIRMED); //TODO: space to improve, make host able to approve rebooking
+        booking.setUpdateAt(LocalDate.now());
+
+        return bookingRepository.save(booking);
+    }
+
+    private boolean validateBookingForRebooking(Booking booking) {
+        if(!booking.getStatus().equals(BookingStatus.CANCELLED)) {
+            throw new BadRequestException("Booking not cancelled");
         }
         return true;
     }

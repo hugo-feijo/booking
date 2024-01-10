@@ -168,4 +168,36 @@ public class BookingServiceTests {
         var cancelledBooking = bookingService.cancelBooking(bookingId.toString());
         assertEquals(BookingStatus.CANCELLED, cancelledBooking.getStatus());
     }
+
+    @Test
+    void rebookBooking_InvalidBookingId_ThrowsBadRequest() {
+        var bookingId = "invalid-booking-id";
+        Mockito.when(propertyService.validUUID(bookingId)).thenThrow(new BadRequestException("Bad Request"));
+
+        var exception = assertThrows(BadRequestException.class, () -> bookingService.rebookBooking(bookingId));
+        assertEquals("Bad Request", exception.getMessage());
+    }
+
+    @Test
+    void rebookBooking_BookingNotCancelled_ThrowsBadRequest() {
+        var bookingId = UUID.randomUUID();
+        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CONFIRMED, LocalDate.now(), null);
+        Mockito.when(propertyService.validUUID(bookingId.toString())).thenReturn(bookingId);
+        Mockito.when(bookingRepository.findById(bookingId)).thenReturn(java.util.Optional.of(booking));
+
+        var exception = assertThrows(BadRequestException.class, () -> bookingService.rebookBooking(bookingId.toString()));
+        assertEquals("Booking not cancelled", exception.getMessage());
+    }
+
+    @Test
+    void rebokBooking_ValidBooking_ReturnsBookingRebooked() {
+        var bookingId = UUID.randomUUID();
+        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CANCELLED, LocalDate.now(), null);
+        Mockito.when(propertyService.validUUID(bookingId.toString())).thenReturn(bookingId);
+        Mockito.when(bookingRepository.findById(bookingId)).thenReturn(java.util.Optional.of(booking));
+        Mockito.when(bookingRepository.save(booking)).thenReturn(booking);
+
+        var cancelledBooking = bookingService.rebookBooking(bookingId.toString());
+        assertEquals(BookingStatus.CONFIRMED, cancelledBooking.getStatus());
+    }
 }

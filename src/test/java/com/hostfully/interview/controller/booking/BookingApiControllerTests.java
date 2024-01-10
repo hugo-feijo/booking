@@ -215,6 +215,52 @@ class BookingApiControllerTests {
                 .andExpect(jsonPath("message", is("Booking already cancelled")));
     }
 
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
+    public void rebookBooking_ValidBooking_ReturnsBookingRebooked() throws Exception {
+        var booking = createBooking();
+
+        var result = bookingRepository.findById(booking.getId()).get();
+        Assertions.assertEquals(BookingStatus.CONFIRMED, result.getStatus());
+
+        mockMvc.perform(put("/booking/{id}/action/cancel", booking.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("id", is(booking.getId().toString())))
+                .andExpect(jsonPath("status", is(BookingStatus.CANCELLED.toString())));
+
+        var bookingCancel = bookingRepository.findById(booking.getId()).get();
+        Assertions.assertEquals(BookingStatus.CANCELLED, bookingCancel.getStatus());
+
+        mockMvc.perform(put("/booking/{id}/action/rebook", booking.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("id", is(booking.getId().toString())))
+                .andExpect(jsonPath("status", is(BookingStatus.CONFIRMED.toString())));
+
+        var bookingRebook = bookingRepository.findById(booking.getId()).get();
+        Assertions.assertEquals(BookingStatus.CONFIRMED, bookingRebook.getStatus());
+    }
+
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
+    public void rebookBooking_BookingNotCancelled_ReturnsBadRequest() throws Exception {
+        var booking = createBooking();
+
+        var result = bookingRepository.findById(booking.getId()).get();
+        Assertions.assertEquals(BookingStatus.CONFIRMED, result.getStatus());
+
+        mockMvc.perform(put("/booking/{id}/action/rebook", booking.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Booking not cancelled")));
+    }
+
     private Booking createBooking() throws Exception {
         var startDate = LocalDate.of(2023, 1, 5);
         var endDate = LocalDate.of(2023, 1, 15);
