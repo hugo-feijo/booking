@@ -23,4 +23,10 @@ public class BookingApiController implements BookingApi {
         var entity = bookingService.createBooking(bookingCreateDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(entity);
     }
+
+    @Override
+    public ResponseEntity<Booking> cancelBooking(String bookingId) {
+        return ResponseEntity.ok(bookingService.cancelBooking(bookingId));
+    }
+
 }

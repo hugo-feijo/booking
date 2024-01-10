@@ -32,7 +32,7 @@ public class BookingServiceTests {
     @InjectMocks
     private BookingService bookingService;
 
-    private Property property = new Property(UUID.randomUUID(), "Property Name");
+    private final Property property = new Property(UUID.randomUUID(), "Property Name");
 
     @BeforeEach
     public void setup() {
@@ -135,5 +135,37 @@ public class BookingServiceTests {
 
         var bookings = bookingService.getBookingsByPropertyId(propertyId);
         assertEquals(1, bookings.size());
+    }
+
+    @Test
+    void cancelBooking_InvalidBookingId_ThrowsBadRequest() {
+        var bookingId = "invalid-booking-id";
+        Mockito.when(propertyService.validUUID(bookingId)).thenThrow(new BadRequestException("Bad Request"));
+
+        var exception = assertThrows(BadRequestException.class, () -> bookingService.cancelBooking(bookingId));
+        assertEquals("Bad Request", exception.getMessage());
+    }
+
+    @Test
+    void cancelBooking_BookingCancelled_ThrowsBadRequest() {
+        var bookingId = UUID.randomUUID();
+        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CANCELLED, LocalDate.now(), null);
+        Mockito.when(propertyService.validUUID(bookingId.toString())).thenReturn(bookingId);
+        Mockito.when(bookingRepository.findById(bookingId)).thenReturn(java.util.Optional.of(booking));
+
+        var exception = assertThrows(BadRequestException.class, () -> bookingService.cancelBooking(bookingId.toString()));
+        assertEquals("Booking already cancelled", exception.getMessage());
+    }
+
+    @Test
+    void cancelBooking_ValidBooking_ReturnsBookingCancelled() {
+        var bookingId = UUID.randomUUID();
+        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CONFIRMED, LocalDate.now(), null);
+        Mockito.when(propertyService.validUUID(bookingId.toString())).thenReturn(bookingId);
+        Mockito.when(bookingRepository.findById(bookingId)).thenReturn(java.util.Optional.of(booking));
+        Mockito.when(bookingRepository.save(booking)).thenReturn(booking);
+
+        var cancelledBooking = bookingService.cancelBooking(bookingId.toString());
+        assertEquals(BookingStatus.CANCELLED, cancelledBooking.getStatus());
     }
 }

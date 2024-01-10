@@ -41,6 +41,7 @@ public class PropertyService {
         propertyRepository.deleteById(uuid);
     }
 
+    //TODO: extract to a util class
     public UUID validUUID(String id) {
         try {
             return UUID.fromString(id);

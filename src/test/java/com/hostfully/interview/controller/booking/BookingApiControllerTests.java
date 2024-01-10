@@ -1,12 +1,15 @@
 package com.hostfully.interview.controller.booking;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hostfully.interview.model.dto.BookingCreateDto;
 import com.hostfully.interview.model.dto.PropertyCreateDto;
+import com.hostfully.interview.model.entity.Booking;
 import com.hostfully.interview.model.entity.BookingStatus;
 import com.hostfully.interview.model.entity.Property;
 import com.hostfully.interview.repository.BookingRepository;
 import com.hostfully.interview.repository.PropertyRepository;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -164,5 +167,69 @@ class BookingApiControllerTests {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("message", is("Dates already booked")));
+    }
+
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
+    public void cancelBooking_ValidBooking_ReturnsBookingCancelled() throws Exception {
+        var booking = createBooking();
+
+        var result = bookingRepository.findById(booking.getId()).get();
+        Assertions.assertEquals(BookingStatus.CONFIRMED, result.getStatus());
+
+        mockMvc.perform(put("/booking/{id}/action/cancel", booking.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("id", is(booking.getId().toString())))
+                .andExpect(jsonPath("status", is(BookingStatus.CANCELLED.toString())));
+
+        var bookingCancel = bookingRepository.findById(booking.getId()).get();
+        Assertions.assertEquals(BookingStatus.CANCELLED, bookingCancel.getStatus());
+    }
+
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
+    public void cancelBooking_BookingAlreadyCancelled_ReturnsBadRequest() throws Exception {
+        var booking = createBooking();
+
+        var result = bookingRepository.findById(booking.getId()).get();
+        Assertions.assertEquals(BookingStatus.CONFIRMED, result.getStatus());
+
+        mockMvc.perform(put("/booking/{id}/action/cancel", booking.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("id", is(booking.getId().toString())))
+                .andExpect(jsonPath("status", is(BookingStatus.CANCELLED.toString())));
+
+        var bookingCancel = bookingRepository.findById(booking.getId()).get();
+        Assertions.assertEquals(BookingStatus.CANCELLED, bookingCancel.getStatus());
+
+        mockMvc.perform(put("/booking/{id}/action/cancel", booking.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Booking already cancelled")));
+    }
+
+    private Booking createBooking() throws Exception {
+        var startDate = LocalDate.of(2023, 1, 5);
+        var endDate = LocalDate.of(2023, 1, 15);
+        var propertyId = "555a2254-e8ff-4005-ada2-4d478b04a5d7";
+        var bookingCreateDto = new BookingCreateDto(propertyId, startDate, endDate);
+
+        var responseBookingCreation = mockMvc.perform(post("/booking")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookingCreateDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        return objectMapper.readValue(responseBookingCreation, Booking.class);
     }
 }

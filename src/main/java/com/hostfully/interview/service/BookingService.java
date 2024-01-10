@@ -51,8 +51,30 @@ public class BookingService {
         return booking;
     }
 
+    public Booking getBooking(String bookingId) {
+        var uuid = propertyService.validUUID(bookingId);
+        return bookingRepository.findById(uuid).orElseThrow(() -> new BadRequestException("Bad Request"));
+    }
+
     public List<Booking> getBookingsByPropertyId(String propertyId) {
         var property = propertyService.getProperty(propertyId);
         return bookingRepository.findAllByProperty(property);
+    }
+
+    public Booking cancelBooking(String bookingId) {
+        var booking = getBooking(bookingId);
+        validateBookingStatus(booking);
+
+        booking.setStatus(BookingStatus.CANCELLED);
+        booking.setUpdateAt(LocalDate.now());
+
+        return bookingRepository.save(booking);
+    }
+
+    private boolean validateBookingStatus(Booking booking) {
+        if(booking.getStatus().equals(BookingStatus.CANCELLED)) {
+            throw new BadRequestException("Booking already cancelled");
+        }
+        return true;
     }
 }
