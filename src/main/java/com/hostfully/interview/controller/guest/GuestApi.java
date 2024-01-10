@@ -3,6 +3,7 @@ package com.hostfully.interview.controller.guest;
 import com.hostfully.interview.model.dto.ErrorInfoDto;
 import com.hostfully.interview.model.dto.GuestCreateDTO;
 import com.hostfully.interview.model.entity.Booking;
+import com.hostfully.interview.model.entity.Guest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,4 +25,11 @@ public interface GuestApi {
             @ApiResponse(responseCode = "400", description = "bad request", content = @Content(schema = @Schema(implementation = ErrorInfoDto.class)))})
     @PostMapping("/{id}/guest")
     ResponseEntity<Booking> createGuest(@Parameter(description="Booking id") @PathVariable("id") String bookingId, @RequestBody GuestCreateDTO guestCreateDTO);
+
+    @Operation(summary = "Update a Guest", description = "Update a Guest Details", tags = {"guest"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = Booking.class))),
+            @ApiResponse(responseCode = "400", description = "bad request", content = @Content(schema = @Schema(implementation = ErrorInfoDto.class)))})
+    @PostMapping("/guest/{id}")
+    ResponseEntity<Guest> updateGuest(@Parameter(description="Guest id") @PathVariable("id") String guestId, @RequestBody GuestCreateDTO guestCreateDTO);
 }

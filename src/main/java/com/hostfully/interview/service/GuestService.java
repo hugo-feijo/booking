@@ -3,15 +3,21 @@ package com.hostfully.interview.service;
 import com.hostfully.interview.exception.BadRequestException;
 import com.hostfully.interview.model.dto.GuestCreateDTO;
 import com.hostfully.interview.model.entity.Booking;
+import com.hostfully.interview.model.entity.Guest;
+import com.hostfully.interview.repository.GuestRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class GuestService {
 
     private final BookingService bookingService;
+    private final GuestRepository guestRepository;
 
-    public GuestService(BookingService bookingService) {
+    public GuestService(BookingService bookingService, GuestRepository guestRepository) {
         this.bookingService = bookingService;
+        this.guestRepository = guestRepository;
     }
 
     public Booking createGuest(String bookingId, GuestCreateDTO guestCreateDTO) {
@@ -27,5 +33,27 @@ public class GuestService {
         }
         guestCreateDTO.validate();
         return true;
+    }
+
+    public Guest getGuest(String guestId) {
+        UUID uuid = null;
+        if (guestId == null) {
+            throw new BadRequestException("Guest id is required");
+        }
+
+        try {
+            uuid = UUID.fromString(guestId);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid guest id");
+        }
+
+
+        return guestRepository.findById(uuid).orElseThrow(() -> new BadRequestException("Bad Request"));
+    }
+
+    public Guest updateGuest(String guestId, GuestCreateDTO guestCreateDTO) {
+        var guest = getGuest(guestId);
+        guest.setName(guestCreateDTO.getName());
+        return guestRepository.save(guest);
     }
 }

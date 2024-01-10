@@ -98,6 +98,22 @@ class GuestApiControllerTests {
                 .andExpect(jsonPath("message", is("Guest name is required")));
     }
 
+    @Test
+    @Sql("classpath:sql/insert-property.sql")
+    public void updateGuest_ValidRequest_ShouldReturnGuest() throws Exception {
+        var booking = createBooking();
+        var guest = booking.getGuests().get(0);
+        var guestCreateDTO = new GuestCreateDTO("guest2");
+
+        mockMvc.perform(post("/booking/guest/{id}", guest.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(guestCreateDTO))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("name", is("guest2")));
+    }
+
     public Booking createBooking() {
         var property = propertyRepository.findById(UUID.fromString("555a2254-e8ff-4005-ada2-4d478b04a5d7")).get();
         var startDate = LocalDate.now();

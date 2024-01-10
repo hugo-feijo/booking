@@ -4,6 +4,7 @@ import com.hostfully.interview.exception.BadRequestException;
 import com.hostfully.interview.model.dto.GuestCreateDTO;
 import com.hostfully.interview.model.entity.Booking;
 import com.hostfully.interview.model.entity.Guest;
+import com.hostfully.interview.repository.GuestRepository;
 import com.hostfully.interview.service.BookingService;
 import com.hostfully.interview.service.GuestService;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,10 +15,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -26,6 +24,9 @@ public class GuestServiceTests {
 
     @Mock
     private BookingService bookingService;
+
+    @Mock
+    private GuestRepository guestRepository;
 
     @InjectMocks
     private GuestService guestService;
@@ -77,6 +78,39 @@ public class GuestServiceTests {
         assertEquals(booking, result);
         assertEquals(2, result.getGuests().size());
         assertEquals("Alan Wake", result.getGuests().get(1).getName());
+    }
+
+    @Test
+    void updateGuest_NullGuestId_ThrowsException() {
+        var exception = assertThrows(BadRequestException.class, () -> guestService.updateGuest(null, null));
+        assertEquals("Guest id is required", exception.getMessage());
+    }
+
+    @Test
+    void getGuest_InvalidGuestId_ThrowsException() {
+        var exception = assertThrows(BadRequestException.class, () -> guestService.updateGuest("invalid-guest-id", null));
+        assertEquals("Invalid guest id", exception.getMessage());
+    }
+
+    @Test
+    void updateGuest_GuestNotFound_ThrowsException() {
+        var guestId = UUID.randomUUID().toString();
+        Mockito.when(guestRepository.findById(UUID.fromString(guestId))).thenReturn(Optional.empty());
+
+        var exception = assertThrows(BadRequestException.class, () -> guestService.updateGuest(guestId, null));
+        assertEquals("Bad Request", exception.getMessage());
+    }
+
+    @Test
+    void updateGuest_ValidGuestId_ReturnsGuest() {
+        var guestId = UUID.randomUUID().toString();
+        var guest = new Guest(UUID.randomUUID(), "John Doe", LocalDate.now(), null);
+        Mockito.when(guestRepository.findById(UUID.fromString(guestId))).thenReturn(Optional.of(guest));
+        Mockito.when(guestRepository.save(guest)).thenReturn(guest);
+
+        var result = guestService.updateGuest(guestId, new GuestCreateDTO("Alan Wake"));
+
+        assertEquals("Alan Wake", result.getName());
     }
 
 }
