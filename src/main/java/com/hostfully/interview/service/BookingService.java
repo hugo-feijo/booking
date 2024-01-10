@@ -27,7 +27,7 @@ public class BookingService {
         bookingCreateDto.validate();
         var booking = bookingCreateDtoToBooking(bookingCreateDto);
         validateIfDatesAreAvailable(bookingCreateDto.getPropertyId(), null, bookingCreateDto.getStartDate(), bookingCreateDto.getEndDate());
-        return bookingRepository.save(booking);
+        return saveBooking(booking);
     }
 
     public boolean validateIfDatesAreAvailable(String propertyId, String bookingId, LocalDate startDate, LocalDate endDate) {
@@ -71,7 +71,7 @@ public class BookingService {
         booking.setStatus(BookingStatus.CANCELLED);
         booking.setUpdateAt(LocalDate.now());
 
-        return bookingRepository.save(booking);
+        return saveBooking(booking);
     }
 
     private boolean validateBookingForCancellation(Booking booking) {
@@ -89,7 +89,7 @@ public class BookingService {
         booking.setStatus(BookingStatus.CONFIRMED); //TODO: space to improve, make host able to approve rebooking
         booking.setUpdateAt(LocalDate.now());
 
-        return bookingRepository.save(booking);
+        return saveBooking(booking);
     }
 
     private boolean validateBookingForRebooking(Booking booking) {
@@ -112,6 +112,10 @@ public class BookingService {
         booking.setStartDate(bookingUpdateDto.getStartDate());
         booking.setEndDate(bookingUpdateDto.getEndDate());
 
+        return saveBooking(booking);
+    }
+
+    public Booking saveBooking(Booking booking) {
         return bookingRepository.save(booking);
     }
 }

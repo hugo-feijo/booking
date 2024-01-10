@@ -1,18 +1,13 @@
 package com.hostfully.interview.controller.booking;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hostfully.interview.exception.BadRequestException;
 import com.hostfully.interview.model.dto.BookingCreateDto;
 import com.hostfully.interview.model.dto.BookingUpdateDto;
 import com.hostfully.interview.model.dto.GuestCreateDTO;
-import com.hostfully.interview.model.dto.PropertyCreateDto;
 import com.hostfully.interview.model.entity.Booking;
 import com.hostfully.interview.model.entity.BookingStatus;
-import com.hostfully.interview.model.entity.Property;
 import com.hostfully.interview.repository.BookingRepository;
 import com.hostfully.interview.repository.PropertyRepository;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -28,7 +23,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -57,7 +51,6 @@ class BookingApiControllerTests {
     }
 
     //TODO: test blocking scenario
-
 
     @Test
     @Sql(scripts = "/sql/insert-property.sql")
