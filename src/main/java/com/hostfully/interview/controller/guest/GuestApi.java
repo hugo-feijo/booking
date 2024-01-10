@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,4 +33,11 @@ public interface GuestApi {
             @ApiResponse(responseCode = "400", description = "bad request", content = @Content(schema = @Schema(implementation = ErrorInfoDto.class)))})
     @PostMapping("/guest/{id}")
     ResponseEntity<Guest> updateGuest(@Parameter(description="Guest id") @PathVariable("id") String guestId, @RequestBody GuestCreateDTO guestCreateDTO);
+
+    @Operation(summary = "Deleting Guest", description = "Deleting a Guest", tags = {"guest"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "successful operation"),
+            @ApiResponse(responseCode = "400", description = "bad request", content = @Content(schema = @Schema(implementation = ErrorInfoDto.class)))})
+    @DeleteMapping("/{booking-id}/guest/{guest-id}")
+    ResponseEntity<?> deleteGuest(@Parameter(description="Booking id") @PathVariable("booking-id") String bookingId, @Parameter(description="Guest id") @PathVariable("guest-id") String guestId);
 }

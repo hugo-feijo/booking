@@ -56,4 +56,19 @@ public class GuestService {
         guest.setName(guestCreateDTO.getName());
         return guestRepository.save(guest);
     }
+
+    public void deleteGuest(String bookingId, String guestId) {
+        var guest = getGuest(guestId);
+        var booking = bookingService.getBooking(bookingId);
+        validateBookingGuest(booking);
+
+        guestRepository.delete(guest);
+    }
+
+    private boolean validateBookingGuest(Booking booking) {
+        if(booking.getGuests().size() == 1) {
+            throw new BadRequestException("Booking must have at least one guest");
+        }
+        return true;
+    }
 }

@@ -23,6 +23,7 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -112,6 +113,40 @@ class GuestApiControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("name", is("guest2")));
+    }
+
+    @Test
+    @Sql("classpath:sql/insert-property.sql")
+    public void deleteGuest_ValidRequest_ShouldReturnNoContent() throws Exception {
+        var booking = createBooking();
+        var guest = booking.getGuests().get(0);
+        var guestCreateDTO = new GuestCreateDTO("guest2");
+
+        mockMvc.perform(post("/booking/{id}/guest", booking.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(guestCreateDTO))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+
+        mockMvc.perform(delete("/booking/{booking-id}/guest/{guest-id}", booking.getId(), guest.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @Sql("classpath:sql/insert-property.sql")
+    public void deleteGuest_BookingWithOneGuest_ShouldReturnBadRequest() throws Exception {
+        var booking = createBooking();
+        var guest = booking.getGuests().get(0);
+
+        mockMvc.perform(delete("/booking/{booking-id}/guest/{guest-id}", booking.getId(), guest.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("message", is("Booking must have at least one guest")));
     }
 
     public Booking createBooking() {

@@ -113,4 +113,35 @@ public class GuestServiceTests {
         assertEquals("Alan Wake", result.getName());
     }
 
+    @Test
+    void deleteGuest_NullGuestId_ThrowsException() {
+        var exception = assertThrows(BadRequestException.class, () -> guestService.deleteGuest(UUID.randomUUID().toString(), null));
+        assertEquals("Guest id is required", exception.getMessage());
+    }
+
+    @Test
+    void deleteGuest_NullBookingId_ThrowsException() {
+        var guestId = UUID.randomUUID();
+        Mockito.when(guestRepository.findById(guestId)).thenReturn(Optional.of(new Guest()));
+        Mockito.when(bookingService.getBooking(null)).thenThrow(new BadRequestException("Booking id is required"));
+        var exception = assertThrows(BadRequestException.class, () -> guestService.deleteGuest(null, guestId.toString()));
+
+        assertEquals("Booking id is required", exception.getMessage());
+    }
+
+    @Test
+    void deleteGuest_OnlyOneGuest_ThrowsException() {
+        var guestId = UUID.randomUUID();
+        var bookingId = UUID.randomUUID();
+        var booking = new Booking();
+        booking.setId(bookingId);
+        booking.setGuests(List.of(new Guest(guestId, "John Doe", LocalDate.now(), null)));
+        Mockito.when(guestRepository.findById(guestId)).thenReturn(Optional.of(new Guest()));
+        Mockito.when(bookingService.getBooking(bookingId.toString())).thenReturn(booking);
+
+        var exception = assertThrows(BadRequestException.class, () -> guestService.deleteGuest(bookingId.toString(), guestId.toString()));
+
+        assertEquals("Booking must have at least one guest", exception.getMessage());
+    }
+
 }

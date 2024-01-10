@@ -28,4 +28,10 @@ public class GuestApiController implements GuestApi {
     public ResponseEntity<Guest> updateGuest(String guestId, GuestCreateDTO guestCreateDTO) {
         return ResponseEntity.ok(guestService.updateGuest(guestId, guestCreateDTO));
     }
+
+    @Override
+    public ResponseEntity<?> deleteGuest(String bookingId, String guestId) {
+        guestService.deleteGuest(bookingId, guestId);
+        return ResponseEntity.noContent().build();
+    }
 }
