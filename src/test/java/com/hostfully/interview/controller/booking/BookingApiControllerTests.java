@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hostfully.interview.exception.BadRequestException;
 import com.hostfully.interview.model.dto.BookingCreateDto;
 import com.hostfully.interview.model.dto.BookingUpdateDto;
+import com.hostfully.interview.model.dto.GuestCreateDTO;
 import com.hostfully.interview.model.dto.PropertyCreateDto;
 import com.hostfully.interview.model.entity.Booking;
 import com.hostfully.interview.model.entity.BookingStatus;
@@ -23,6 +24,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
@@ -46,6 +48,8 @@ class BookingApiControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private final List<GuestCreateDTO> guests = List.of(new GuestCreateDTO("John"));
+
     @AfterEach
     void setUp() {
         bookingRepository.deleteAll();
@@ -58,7 +62,7 @@ class BookingApiControllerTests {
     @Test
     @Sql(scripts = "/sql/insert-property.sql")
     public void createProperty_ValidDto_EntityIsReturnedAndInserted() throws Exception {
-        var bookingCreateDto = new BookingCreateDto("555a2254-e8ff-4005-ada2-4d478b04a5d7", LocalDate.now(), LocalDate.now().plusDays(1));
+        var bookingCreateDto = new BookingCreateDto("555a2254-e8ff-4005-ada2-4d478b04a5d7", LocalDate.now(), LocalDate.now().plusDays(1), guests);
 
         mockMvc.perform(post("/booking")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -69,12 +73,13 @@ class BookingApiControllerTests {
                 .andExpect(jsonPath("property.id", is(bookingCreateDto.getPropertyId())))
                 .andExpect(jsonPath("startDate", is(bookingCreateDto.getStartDate().toString())))
                 .andExpect(jsonPath("endDate", is(bookingCreateDto.getEndDate().toString())))
-                .andExpect(jsonPath("status", is(BookingStatus.CONFIRMED.toString())));
+                .andExpect(jsonPath("status", is(BookingStatus.CONFIRMED.toString())))
+                .andExpect(jsonPath("guests[0].name", is(bookingCreateDto.getGuests().get(0).getName())));
     }
 
     @Test
     public void createProperty_InvalidPropertyId_BadRequestIsThrows() throws Exception {
-        var bookingCreateDto = new BookingCreateDto("invalid-id", LocalDate.now(), LocalDate.now().plusDays(1));
+        var bookingCreateDto = new BookingCreateDto("invalid-id", LocalDate.now(), LocalDate.now().plusDays(1), guests);
 
         mockMvc.perform(post("/booking")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -85,7 +90,7 @@ class BookingApiControllerTests {
     }
     @Test
     public void createProperty_NonexistentProperty_BadRequestIsThrows() throws Exception {
-        var bookingCreateDto = new BookingCreateDto(UUID.randomUUID().toString(), LocalDate.now(), LocalDate.now().plusDays(1));
+        var bookingCreateDto = new BookingCreateDto(UUID.randomUUID().toString(), LocalDate.now(), LocalDate.now().plusDays(1), guests);
 
         mockMvc.perform(post("/booking")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -97,7 +102,7 @@ class BookingApiControllerTests {
 
     @Test
     public void createProperty_MissingPropertyId_BadRequestIsThrows() throws Exception {
-        var bookingCreateDto = new BookingCreateDto(null, LocalDate.now(), LocalDate.now().plusDays(1));
+        var bookingCreateDto = new BookingCreateDto(null, LocalDate.now(), LocalDate.now().plusDays(1), guests);
 
         mockMvc.perform(post("/booking")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -109,7 +114,7 @@ class BookingApiControllerTests {
 
     @Test
     public void createProperty_MissingStartDate_BadRequestIsThrows() throws Exception {
-        var bookingCreateDto = new BookingCreateDto(UUID.randomUUID().toString(), null, LocalDate.now().plusDays(1));
+        var bookingCreateDto = new BookingCreateDto(UUID.randomUUID().toString(), null, LocalDate.now().plusDays(1), guests);
 
         mockMvc.perform(post("/booking")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -121,7 +126,7 @@ class BookingApiControllerTests {
 
     @Test
     public void createProperty_MissingEndDate_BadRequestIsThrows() throws Exception {
-        var bookingCreateDto = new BookingCreateDto(UUID.randomUUID().toString(), LocalDate.now(), null);
+        var bookingCreateDto = new BookingCreateDto(UUID.randomUUID().toString(), LocalDate.now(), null, guests);
 
         mockMvc.perform(post("/booking")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -133,7 +138,7 @@ class BookingApiControllerTests {
     @Test
     @Sql(scripts = "/sql/insert-property.sql")
     public void createProperty_StartDateAfterEndDate_BadRequestIsThrows() throws Exception {
-        var bookingCreateDto = new BookingCreateDto("555a2254-e8ff-4005-ada2-4d478b04a5d7", LocalDate.now().plusDays(1), LocalDate.now());
+        var bookingCreateDto = new BookingCreateDto("555a2254-e8ff-4005-ada2-4d478b04a5d7", LocalDate.now().plusDays(1), LocalDate.now(), guests);
 
         mockMvc.perform(post("/booking")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -149,7 +154,7 @@ class BookingApiControllerTests {
         var startDate = LocalDate.of(2023, 1, 5);
         var endDate = LocalDate.of(2023, 1, 15);
         var propertyId = "555a2254-e8ff-4005-ada2-4d478b04a5d7";
-        var bookingCreateDto = new BookingCreateDto(propertyId, startDate, endDate);
+        var bookingCreateDto = new BookingCreateDto(propertyId, startDate, endDate, guests);
 
         mockMvc.perform(post("/booking")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -162,7 +167,7 @@ class BookingApiControllerTests {
                 .andExpect(jsonPath("endDate", is(bookingCreateDto.getEndDate().toString())))
                 .andExpect(jsonPath("status", is(BookingStatus.CONFIRMED.toString())));
 
-        var bookingCreateDto2 = new BookingCreateDto(propertyId, startDate.plusDays(1), endDate.plusDays(1));
+        var bookingCreateDto2 = new BookingCreateDto(propertyId, startDate.plusDays(1), endDate.plusDays(1), guests);
 
         mockMvc.perform(post("/booking")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -171,6 +176,46 @@ class BookingApiControllerTests {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("message", is("Dates already booked")));
     }
+
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
+    public void createProperty_MissingGuests_BadRequestIsThrows() throws Exception {
+        var bookingCreateDto = new BookingCreateDto("555a2254-e8ff-4005-ada2-4d478b04a5d7", LocalDate.now(), LocalDate.now().plusDays(1), null);
+
+        mockMvc.perform(post("/booking")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookingCreateDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Guests is required")));
+    }
+
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
+    public void createProperty_EmptyGuests_BadRequestIsThrows() throws Exception {
+        var bookingCreateDto = new BookingCreateDto("555a2254-e8ff-4005-ada2-4d478b04a5d7", LocalDate.now(), LocalDate.now().plusDays(1), List.of());
+
+        mockMvc.perform(post("/booking")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookingCreateDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Guests is required")));
+    }
+
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
+    public void createProperty_InvalidGuests_BadRequestIsThrows() throws Exception {
+        var bookingCreateDto = new BookingCreateDto("555a2254-e8ff-4005-ada2-4d478b04a5d7", LocalDate.now(), LocalDate.now().plusDays(1), List.of(new GuestCreateDTO(null)));
+
+        mockMvc.perform(post("/booking")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookingCreateDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Guest name is required")));
+    }
+
 
     @Test
     @Sql(scripts = "/sql/insert-property.sql")
@@ -424,7 +469,7 @@ class BookingApiControllerTests {
 
     private Booking createBooking(LocalDate startDate, LocalDate endDate) throws Exception {
         var propertyId = "555a2254-e8ff-4005-ada2-4d478b04a5d7";
-        var bookingCreateDto = new BookingCreateDto(propertyId, startDate, endDate);
+        var bookingCreateDto = new BookingCreateDto(propertyId, startDate, endDate, guests);
 
         var responseBookingCreation = mockMvc.perform(post("/booking")
                         .contentType(MediaType.APPLICATION_JSON)

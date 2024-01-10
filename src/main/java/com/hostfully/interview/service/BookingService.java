@@ -3,6 +3,7 @@ package com.hostfully.interview.service;
 import com.hostfully.interview.exception.BadRequestException;
 import com.hostfully.interview.model.dto.BookingCreateDto;
 import com.hostfully.interview.model.dto.BookingUpdateDto;
+import com.hostfully.interview.model.dto.GuestCreateDTO;
 import com.hostfully.interview.model.entity.Booking;
 import com.hostfully.interview.model.entity.BookingStatus;
 import com.hostfully.interview.repository.BookingRepository;
@@ -48,6 +49,7 @@ public class BookingService {
         booking.setEndDate(bookingCreateDto.getEndDate());
         booking.setStatus(BookingStatus.CONFIRMED);
         booking.setCreatedAt(LocalDate.now());
+        booking.setGuests(bookingCreateDto.getGuests().stream().map(GuestCreateDTO::toEntity).toList());
 
         return booking;
     }

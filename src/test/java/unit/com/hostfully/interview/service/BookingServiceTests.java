@@ -3,8 +3,10 @@ package unit.com.hostfully.interview.service;
 import com.hostfully.interview.exception.BadRequestException;
 import com.hostfully.interview.model.dto.BookingCreateDto;
 import com.hostfully.interview.model.dto.BookingUpdateDto;
+import com.hostfully.interview.model.dto.GuestCreateDTO;
 import com.hostfully.interview.model.entity.Booking;
 import com.hostfully.interview.model.entity.BookingStatus;
+import com.hostfully.interview.model.entity.Guest;
 import com.hostfully.interview.model.entity.Property;
 import com.hostfully.interview.repository.BookingRepository;
 import com.hostfully.interview.service.BookingService;
@@ -38,6 +40,8 @@ public class BookingServiceTests {
     private BookingService bookingService;
 
     private final Property property = new Property(UUID.randomUUID(), "Property Name");
+    private final List<Guest> guests = List.of(new Guest(UUID.randomUUID(), "John", LocalDate.now(), null));
+    private final List<GuestCreateDTO> guestCreateDTOS = List.of(new GuestCreateDTO("John"));
 
     @BeforeEach
     public void setup() {
@@ -64,6 +68,7 @@ public class BookingServiceTests {
         dto.setPropertyId(UUID.randomUUID().toString());
         dto.setStartDate(startDate);
         dto.setEndDate(endDate);
+        dto.setGuests(guestCreateDTOS);
 
         Mockito.when(bookingRepository.existByPropertyIdAndDateRange(dto.getPropertyId(), null, startDate, endDate)).thenReturn(true);
 
@@ -78,6 +83,7 @@ public class BookingServiceTests {
         dto.setPropertyId(UUID.randomUUID().toString());
         dto.setStartDate(startDate);
         dto.setEndDate(endDate);
+        dto.setGuests(guestCreateDTOS);
 
         Mockito.when(bookingRepository.existByPropertyIdAndDateRange(dto.getPropertyId(), null,  startDate, endDate)).thenReturn(false);
 
@@ -89,10 +95,11 @@ public class BookingServiceTests {
     void createBooking_ValidDto_ReturnsEntity() {
         var startDate = LocalDate.now();
         var endDate = LocalDate.now().plusDays(1);
-        var booking = new Booking(UUID.randomUUID(), property, startDate, endDate, BookingStatus.PENDING, LocalDate.now(), null);
+        var booking = new Booking(UUID.randomUUID(), property, startDate, endDate, BookingStatus.PENDING, LocalDate.now(), null, guests);
         dto.setPropertyId(UUID.randomUUID().toString());
         dto.setStartDate(startDate);
         dto.setEndDate(endDate);
+        dto.setGuests(guestCreateDTOS);
 
         Mockito.when(propertyService.getProperty(dto.getPropertyId())).thenReturn(property);
         Mockito.when(bookingRepository.save(ArgumentMatchers.any(Booking.class))).thenReturn(booking);
@@ -114,6 +121,7 @@ public class BookingServiceTests {
         dto.setPropertyId(property.getId().toString());
         dto.setStartDate(LocalDate.now());
         dto.setEndDate(LocalDate.now().plusDays(1));
+        dto.setGuests(guestCreateDTOS);
         Mockito.when(propertyService.getProperty(dto.getPropertyId())).thenReturn(property);
 
         var booking = bookingService.bookingCreateDtoToBooking(dto);
@@ -154,7 +162,7 @@ public class BookingServiceTests {
     @Test
     void getBooking_ValidBookingId_ReturnsBooking() {
         var bookingId = UUID.randomUUID();
-        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CONFIRMED, LocalDate.now(), null);
+        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CONFIRMED, LocalDate.now(), null, guests);
         Mockito.when(propertyService.validUUID(bookingId.toString())).thenReturn(bookingId);
         Mockito.when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
 
@@ -174,7 +182,7 @@ public class BookingServiceTests {
     @Test
     void cancelBooking_BookingCancelled_ThrowsBadRequest() {
         var bookingId = UUID.randomUUID();
-        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CANCELLED, LocalDate.now(), null);
+        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CANCELLED, LocalDate.now(), null, guests);
         Mockito.when(propertyService.validUUID(bookingId.toString())).thenReturn(bookingId);
         Mockito.when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
 
@@ -185,7 +193,7 @@ public class BookingServiceTests {
     @Test
     void cancelBooking_ValidBooking_ReturnsBookingCancelled() {
         var bookingId = UUID.randomUUID();
-        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CONFIRMED, LocalDate.now(), null);
+        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CONFIRMED, LocalDate.now(), null, guests);
         Mockito.when(propertyService.validUUID(bookingId.toString())).thenReturn(bookingId);
         Mockito.when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
         Mockito.when(bookingRepository.save(booking)).thenReturn(booking);
@@ -206,7 +214,7 @@ public class BookingServiceTests {
     @Test
     void rebookBooking_BookingNotCancelled_ThrowsBadRequest() {
         var bookingId = UUID.randomUUID();
-        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CONFIRMED, LocalDate.now(), null);
+        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CONFIRMED, LocalDate.now(), null, guests);
         Mockito.when(propertyService.validUUID(bookingId.toString())).thenReturn(bookingId);
         Mockito.when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
 
@@ -217,7 +225,7 @@ public class BookingServiceTests {
     @Test
     void rebookBooking_ValidBooking_ReturnsBookingRebooked() {
         var bookingId = UUID.randomUUID();
-        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CANCELLED, LocalDate.now(), null);
+        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CANCELLED, LocalDate.now(), null, guests);
         Mockito.when(propertyService.validUUID(bookingId.toString())).thenReturn(bookingId);
         Mockito.when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
         Mockito.when(bookingRepository.save(booking)).thenReturn(booking);
@@ -238,7 +246,7 @@ public class BookingServiceTests {
     @Test
     void deleteBooking_ValidBookingId_ReturnsBookingDeleted() {
         var bookingId = UUID.randomUUID();
-        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CANCELLED, LocalDate.now(), null);
+        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CANCELLED, LocalDate.now(), null, guests);
         Mockito.when(propertyService.validUUID(bookingId.toString())).thenReturn(bookingId);
         Mockito.when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
 
@@ -275,7 +283,7 @@ public class BookingServiceTests {
         var bookingId = UUID.randomUUID();
         var newStartDate = LocalDate.of(2023, 1, 5);
         var newEndDate = LocalDate.of(2023, 1, 15);
-        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CANCELLED, LocalDate.now(), null);
+        var booking = new Booking(UUID.randomUUID(), property, LocalDate.now(), LocalDate.now().plusDays(1), BookingStatus.CANCELLED, LocalDate.now(), null, guests);
         updateDto.setStartDate(newStartDate);
         updateDto.setEndDate(newEndDate);
         Mockito.when(propertyService.validUUID(bookingId.toString())).thenReturn(bookingId);

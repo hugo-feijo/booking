@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -26,9 +27,13 @@ public class BookingCreateDto {
     @Schema(description = "When the booking end", example = "New Unit", requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDate endDate;
 
+    @Schema(description = "Guests that belongs to this booking", requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<GuestCreateDTO> guests;
+
     public boolean validate() {
         return validatePropertyId() &&
-                validateDates();
+                validateDates() &&
+                validateGuests();
     }
 
     public boolean validatePropertyId() {
@@ -58,6 +63,19 @@ public class BookingCreateDto {
         if(!valid) {
             throw new BadRequestException(errorMessage);
         }
+
+        return valid;
+    }
+
+    public boolean validateGuests() {
+        var valid = guests != null && !guests.isEmpty();
+        var errorMessage = "Guests is required";
+
+        if(!valid) {
+            throw new BadRequestException(errorMessage);
+        }
+
+        guests.forEach(GuestCreateDTO::validate);
 
         return valid;
     }
