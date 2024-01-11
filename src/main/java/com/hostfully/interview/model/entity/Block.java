@@ -33,4 +33,11 @@ public class Block {
     @Schema(description = "When the booking end", example = "2022-01-10", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
     private LocalDate endDate;
+
+    @Schema(description = "When the block was created", example = "2021-01-10", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull
+    private LocalDate createdAt;
+
+    @Schema(description = "When the last time the block was updated", example = "2021-01-10")
+    private LocalDate updateAt;
 }

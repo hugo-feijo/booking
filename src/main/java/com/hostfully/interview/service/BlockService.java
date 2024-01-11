@@ -25,7 +25,7 @@ public class BlockService {
         blockCreateDto.validate();
         var property = propertyService.getProperty(propertyId);
         validateIfDatesAreAvailable(propertyId, null, blockCreateDto.getStartDate(), blockCreateDto.getEndDate());
-        var block = new Block(null, property, blockCreateDto.getStartDate(), blockCreateDto.getEndDate());
+        var block = new Block(null, property, blockCreateDto.getStartDate(), blockCreateDto.getEndDate(), LocalDate.now(), null);
         return blockRepository.save(block);
     }
 
@@ -39,5 +39,20 @@ public class BlockService {
         bookingService.validateIfDatesAreAvailable(propertyId, null, startDate, endDate);
 
         return true;
+    }
+
+    public Block updateBlock(BlockCreateDto blockCreateDto, String blockId) {
+        blockCreateDto.validate();
+        var block = getBlock(blockId);
+        validateIfDatesAreAvailable(block.getProperty().getId().toString(), blockId, blockCreateDto.getStartDate(), blockCreateDto.getEndDate());
+        block.setStartDate(blockCreateDto.getStartDate());
+        block.setEndDate(blockCreateDto.getEndDate());
+        block.setUpdateAt(LocalDate.now());
+        return blockRepository.save(block);
+    }
+
+    public Block getBlock(String blockId) {
+        var UUID = propertyService.validUUID(blockId);
+        return blockRepository.findById(UUID).orElseThrow(() -> new BadRequestException("Bad Request"));
     }
 }

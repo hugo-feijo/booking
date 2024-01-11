@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/property")
+@RequestMapping
 public class BlockApiController implements BlockApi {
 
     private final BlockService blockService;
@@ -21,5 +21,10 @@ public class BlockApiController implements BlockApi {
     @Override
     public ResponseEntity<Block> createBlock(BlockCreateDto blockCreateDto, String propertyId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(blockService.createBlock(blockCreateDto, propertyId));
+    }
+
+    @Override
+    public ResponseEntity<Block> updateBlock(BlockCreateDto blockCreateDto, String blockId) {
+        return ResponseEntity.ok(blockService.updateBlock(blockCreateDto, blockId));
     }
 }

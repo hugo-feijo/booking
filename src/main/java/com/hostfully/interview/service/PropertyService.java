@@ -43,6 +43,8 @@ public class PropertyService {
 
     //TODO: extract to a util class
     public UUID validUUID(String id) {
+        if(id == null) throw new BadRequestException("Bad Request");
+
         try {
             return UUID.fromString(id);
         } catch (IllegalArgumentException e) {

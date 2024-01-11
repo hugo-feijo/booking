@@ -140,6 +140,61 @@ class BlockApiControllerTests {
                 .andExpect(jsonPath("message", is("Dates already booked")));
     }
 
+    @Test
+    @Sql("classpath:sql/insert-property.sql")
+    public void updateBlock_ValidRequest_ReturnsUpdateBlock() throws Exception {
+        var block = createBlock();
+        var newStartDate = LocalDate.of(2023, 2, 10);
+        var newEndDate = LocalDate.of(2023, 2, 25);
+        var blockUpdateDto = new BlockCreateDto(newStartDate, newEndDate);
+
+        mockMvc.perform(put("/block/{id}", block.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(blockUpdateDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("id", is(block.getId().toString())))
+                .andExpect(jsonPath("startDate", is(newStartDate.toString())))
+                .andExpect(jsonPath("endDate", is(newEndDate.toString())));
+
+    }
+
+    @Test
+    @Sql("classpath:sql/insert-property.sql")
+    public void updateBlock_InvalidDates_ReturnsBadRequest() throws Exception {
+        var block = createBlock();
+        var newStartDate = LocalDate.of(2023, 2, 10);
+        var newEndDate = LocalDate.of(2023, 2, 5);
+        var blockUpdateDto = new BlockCreateDto(newStartDate, newEndDate);
+
+        mockMvc.perform(put("/block/{id}", block.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(blockUpdateDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("message", is("Start date must be before end date")));
+    }
+
+    @Test
+    @Sql("classpath:sql/insert-property.sql")
+    public void updateBlock_DatesAlreadyBlocked_ReturnsBadRequest() throws Exception {
+        var block = createBlock();
+        var block2 = createBlock(LocalDate.of(2023, 1, 16), LocalDate.of(2023, 1, 25));
+        var newStartDate = LocalDate.of(2023, 1, 17);
+        var newEndDate = LocalDate.of(2023, 1, 20);
+        var blockCreateDto = new BlockCreateDto(newStartDate, newEndDate);
+
+        mockMvc.perform(put("/block/{id}", block.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(blockCreateDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("message", is("Dates already blocked")));
+    }
+
 
     private Booking createBlock() throws Exception {
         var startDate = LocalDate.of(2023, 1, 5);
