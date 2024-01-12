@@ -27,4 +27,10 @@ public class BlockApiController implements BlockApi {
     public ResponseEntity<Block> updateBlock(BlockCreateDto blockCreateDto, String blockId) {
         return ResponseEntity.ok(blockService.updateBlock(blockCreateDto, blockId));
     }
+
+    @Override
+    public ResponseEntity<?> deleteBlock(String blockId) {
+        blockService.deleteBlock(blockId);
+        return ResponseEntity.noContent().build();
+    }
 }

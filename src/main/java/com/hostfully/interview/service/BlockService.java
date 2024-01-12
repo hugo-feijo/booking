@@ -55,4 +55,9 @@ public class BlockService {
         var UUID = propertyService.validUUID(blockId);
         return blockRepository.findById(UUID).orElseThrow(() -> new BadRequestException("Bad Request"));
     }
+
+    public void deleteBlock(String blockId) {
+        var block = getBlock(blockId);
+        blockRepository.delete(block);
+    }
 }

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -193,6 +194,30 @@ class BlockApiControllerTests {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("message", is("Dates already blocked")));
+    }
+
+    @Test
+    @Sql("classpath:sql/insert-property.sql")
+    public void deleteBlock_ValidBlockId_ReturnsNoContent() throws Exception {
+        var block = createBlock();
+
+        mockMvc.perform(delete("/block/{id}", block.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @Sql("classpath:sql/insert-property.sql")
+    public void deleteBlock_InvalidBlockId_ReturnsBadRequest() throws Exception {
+        var blockId = "invalid-block-id";
+
+        mockMvc.perform(delete("/block/{id}", blockId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("message", is("Bad Request")));
     }
 
 

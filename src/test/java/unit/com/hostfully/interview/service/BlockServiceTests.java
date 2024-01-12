@@ -153,4 +153,24 @@ public class BlockServiceTests {
         assertEquals("Dates already booked", exception.getMessage());
     }
 
+    @Test
+    void deleteBlock_ValidBlockId_ReturnsVoid() {
+        var blockId = UUID.randomUUID();
+        var block = new Block(blockId, property, LocalDate.now(), LocalDate.now().plusDays(1), LocalDate.now(), null);
+
+        Mockito.when(propertyService.validUUID(blockId.toString())).thenReturn(blockId);
+        Mockito.when(blockRepository.findById(blockId)).thenReturn(Optional.of(block));
+
+        blockService.deleteBlock(blockId.toString());
+        Mockito.verify(blockRepository, Mockito.times(1)).delete(block);
+    }
+
+    @Test
+    void deleteBlock_InvalidBlockId_ThrowsException() {
+        var blockId = "invalid-block-id";
+
+        Mockito.when(propertyService.validUUID(blockId)).thenThrow(new BadRequestException("Bad Request"));
+        var exception = assertThrows(BadRequestException.class, () -> blockService.deleteBlock(blockId));
+        assertEquals("Bad Request", exception.getMessage());
+    }
 }
