@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@Tag(name = "booking", description = "the Guest API")
+@Tag(name = "guest", description = "the Guest API")
 public interface GuestApi {
 
     @Operation(summary = "Create a Guest", description = "Create a new Guest", tags = {"guest"})

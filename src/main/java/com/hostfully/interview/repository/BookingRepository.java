@@ -17,6 +17,7 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
             SELECT PROPERTY_ID FROM BOOKING
             WHERE PROPERTY_ID = ?1
             AND (ID != ?2 OR ?2 IS NULL)
+            AND STATUS != 'CANCELLED'
             AND START_DATE <= ?4
             AND END_DATE >= ?3)
     """, nativeQuery = true)

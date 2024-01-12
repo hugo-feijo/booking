@@ -42,6 +42,7 @@ public class Booking {
 
     @Schema(description = "Booking status", example = "CONFIRMED", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull
+    @Enumerated(EnumType.STRING)
     private BookingStatus status;
 
     @Schema(description = "When the booking was created", example = "2021-01-10", requiredMode = Schema.RequiredMode.REQUIRED)

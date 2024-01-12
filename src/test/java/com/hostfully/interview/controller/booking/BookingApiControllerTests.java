@@ -172,6 +172,38 @@ class BookingApiControllerTests {
 
     @Test
     @Sql(scripts = "/sql/insert-property.sql")
+    public void createProperty_CancelBookingOverlapping_NewBookingIsReturn() throws Exception {
+        var cancelBooking = createBooking();
+
+        mockMvc.perform(put("/booking/{id}/action/cancel", cancelBooking.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("id", is(cancelBooking.getId().toString())))
+                .andExpect(jsonPath("status", is(BookingStatus.CANCELLED.toString())));
+
+        var startDate = LocalDate.of(2023, 1, 5);
+        var endDate = LocalDate.of(2023, 1, 15);
+        var propertyId = "555a2254-e8ff-4005-ada2-4d478b04a5d7";
+        var bookingCreateDto = new BookingCreateDto(propertyId, startDate, endDate, guests);
+
+        mockMvc.perform(post("/booking")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookingCreateDto))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("id").exists())
+                .andExpect(jsonPath("property.id", is(bookingCreateDto.getPropertyId())))
+                .andExpect(jsonPath("startDate", is(bookingCreateDto.getStartDate().toString())))
+                .andExpect(jsonPath("endDate", is(bookingCreateDto.getEndDate().toString())))
+                .andExpect(jsonPath("status", is(BookingStatus.CONFIRMED.toString())))
+                .andExpect(jsonPath("guests[0].name", is(bookingCreateDto.getGuests().get(0).getName())));
+    }
+
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
     public void createProperty_MissingGuests_BadRequestIsThrows() throws Exception {
         var bookingCreateDto = new BookingCreateDto("555a2254-e8ff-4005-ada2-4d478b04a5d7", LocalDate.now(), LocalDate.now().plusDays(1), null);
 
@@ -300,6 +332,28 @@ class BookingApiControllerTests {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("message", is("Booking not cancelled")));
+    }
+
+    @Test
+    @Sql(scripts = "/sql/insert-property.sql")
+    public void rebookBooking_DatesAlreadyBooked_ReturnsBadRequest() throws Exception {
+        var booking = createBooking();
+
+        mockMvc.perform(put("/booking/{id}/action/cancel", booking.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("id", is(booking.getId().toString())))
+                .andExpect(jsonPath("status", is(BookingStatus.CANCELLED.toString())));
+
+        var newBooking = createBooking();
+
+        mockMvc.perform(put("/booking/{id}/action/rebook", booking.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("message", is("Dates already booked")));
     }
 
     @Test

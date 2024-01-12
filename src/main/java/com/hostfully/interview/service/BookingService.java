@@ -84,6 +84,7 @@ public class BookingService {
     public Booking rebookBooking(String bookingId) {
         var booking = getBooking(bookingId);
         validateBookingForRebooking(booking);
+        validateIfDatesAreAvailable(booking.getProperty().getId().toString(), booking.getId().toString(), booking.getStartDate(), booking.getEndDate());
 
         //TODO: check for blocked dates
         booking.setStatus(BookingStatus.CONFIRMED); //TODO: space to improve, make host able to approve rebooking
