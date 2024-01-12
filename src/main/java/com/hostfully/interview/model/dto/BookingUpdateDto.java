@@ -33,6 +33,7 @@ public class BookingUpdateDto {
         if(startDate == null) errorMessage = "Start date is required";
         if(endDate == null) errorMessage = "End date is required";
         if(startDate != null && endDate != null && startDate.isAfter(endDate)) errorMessage = "Start date must be before end date";
+        if(startDate != null && endDate != null && startDate.isEqual(endDate)) errorMessage = "Start date must be different than end date";
 
         if(!valid) {
             throw new BadRequestException(errorMessage);

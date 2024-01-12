@@ -101,6 +101,16 @@ public class BookingCreateDtoTests {
     }
 
     @Test
+    void validateDates_StartDateEqualsEndDate_ThrowsException() {
+        dto.setPropertyId(UUID.randomUUID().toString());
+        dto.setStartDate(LocalDate.now());
+        dto.setEndDate(LocalDate.now());
+
+        var exception = assertThrows(BadRequestException.class, () -> dto.validateDates());
+        assertEquals("Start date must be different than end date", exception.getMessage());
+    }
+
+    @Test
     void validateGuests_NullGuests_ThrowsException() {
         dto.setPropertyId(UUID.randomUUID().toString());
         dto.setStartDate(LocalDate.now());

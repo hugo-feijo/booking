@@ -60,4 +60,13 @@ public class BookingUpdateDtoTests {
         var exception = assertThrows(BadRequestException.class, () -> dto.validateDates());
         assertEquals("Start date must be before end date", exception.getMessage());
     }
+
+    @Test
+    void validateDates_StartDateEqualsEndDate_ThrowsException() {
+        dto.setStartDate(LocalDate.now());
+        dto.setEndDate(LocalDate.now());
+
+        var exception = assertThrows(BadRequestException.class, () -> dto.validateDates());
+        assertEquals("Start date must be different than end date", exception.getMessage());
+    }
 }

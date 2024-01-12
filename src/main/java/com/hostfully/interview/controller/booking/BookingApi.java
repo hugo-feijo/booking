@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "booking", description = "the Booking API")
 public interface BookingApi {
-    @Operation(summary = "Create Booking", description = "Create a new Booking", tags = {"booking"})
+    @Operation(summary = "Create Booking", description = "Create a new Booking, if dates are not blocked or booked", tags = {"booking"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "successful operation", content = @Content(schema = @Schema(implementation = Booking.class))),
             @ApiResponse(responseCode = "400", description = "bad request", content = @Content(schema = @Schema(implementation = ErrorInfoDto.class)))})
@@ -30,7 +30,7 @@ public interface BookingApi {
     @PutMapping("/{id}/action/cancel")
     ResponseEntity<Booking> cancelBooking(@Parameter(description="Booking id") @PathVariable("id") String bookingId);
 
-    @Operation(summary = "Rebook a Booking", description = "Rebook a cancelled Booking", tags = {"booking"})
+    @Operation(summary = "Rebook a Booking", description = "Rebook a cancelled Booking, if dates are not blocked or booked", tags = {"booking"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = Booking.class))),
             @ApiResponse(responseCode = "400", description = "bad request", content = @Content(schema = @Schema(implementation = ErrorInfoDto.class)))})
