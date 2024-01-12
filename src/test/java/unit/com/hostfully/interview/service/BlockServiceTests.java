@@ -8,6 +8,7 @@ import com.hostfully.interview.repository.BlockRepository;
 import com.hostfully.interview.service.BlockService;
 import com.hostfully.interview.service.BookingService;
 import com.hostfully.interview.service.PropertyService;
+import com.hostfully.interview.service.ReservationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -28,7 +29,7 @@ public class BlockServiceTests {
     private BlockRepository blockRepository;
 
     @Mock
-    private BookingService bookingService;
+    private ReservationService reservationService;
 
     @Spy
     private BlockCreateDto blockCreateDto;
@@ -71,7 +72,8 @@ public class BlockServiceTests {
         blockCreateDto.setEndDate(LocalDate.now().plusDays(1));
 
         Mockito.when(propertyService.getProperty(propertyId)).thenReturn(property);
-        Mockito.when(blockRepository.existByPropertyIdAndDateRange(propertyId, null, blockCreateDto.getStartDate(), blockCreateDto.getEndDate())).thenReturn(true);
+        Mockito.when(reservationService.validateIfDatesAreAvailable(propertyId, blockCreateDto.getStartDate(), blockCreateDto.getEndDate())).thenThrow(new BadRequestException("Dates already blocked"));
+
         var exception = assertThrows(BadRequestException.class, () -> blockService.createBlock(blockCreateDto, propertyId));
         assertEquals("Dates already blocked", exception.getMessage());
     }
@@ -83,8 +85,7 @@ public class BlockServiceTests {
         blockCreateDto.setEndDate(LocalDate.now().plusDays(1));
 
         Mockito.when(propertyService.getProperty(propertyId)).thenReturn(property);
-        Mockito.when(blockRepository.existByPropertyIdAndDateRange(propertyId, null, blockCreateDto.getStartDate(), blockCreateDto.getEndDate())).thenReturn(false);
-        Mockito.when(blockService.validateIfDatesAreAvailable(propertyId, null, blockCreateDto.getStartDate(), blockCreateDto.getEndDate())).thenThrow(new BadRequestException("Dates already booked"));
+        Mockito.when(reservationService.validateIfDatesAreAvailable(propertyId, blockCreateDto.getStartDate(), blockCreateDto.getEndDate())).thenThrow(new BadRequestException("Dates already booked"));
 
         var exception = assertThrows(BadRequestException.class, () -> blockService.createBlock(blockCreateDto, propertyId));
         assertEquals("Dates already booked", exception.getMessage());
@@ -132,7 +133,7 @@ public class BlockServiceTests {
 
         Mockito.when(propertyService.validUUID(blockId.toString())).thenReturn(blockId);
         Mockito.when(blockRepository.findById(blockId)).thenReturn(Optional.of(new Block(blockId, property, LocalDate.now(), LocalDate.now().plusDays(1), LocalDate.now(), null)));
-        Mockito.when(blockRepository.existByPropertyIdAndDateRange(property.getId().toString(), blockId.toString(), blockCreateDto.getStartDate(), blockCreateDto.getEndDate())).thenReturn(true);
+        Mockito.when(reservationService.validateIfDatesAreAvailable(property.getId().toString(), null, blockId.toString(), blockCreateDto.getStartDate(), blockCreateDto.getEndDate())).thenThrow(new BadRequestException("Dates already blocked"));
 
         var exception = assertThrows(BadRequestException.class, () -> blockService.updateBlock(blockCreateDto, blockId.toString()));
         assertEquals("Dates already blocked", exception.getMessage());
@@ -146,8 +147,7 @@ public class BlockServiceTests {
 
         Mockito.when(propertyService.validUUID(blockId.toString())).thenReturn(blockId);
         Mockito.when(blockRepository.findById(blockId)).thenReturn(Optional.of(new Block(blockId, property, LocalDate.now(), LocalDate.now().plusDays(1), LocalDate.now(), null)));
-        Mockito.when(blockRepository.existByPropertyIdAndDateRange(property.getId().toString(), blockId.toString(), blockCreateDto.getStartDate(), blockCreateDto.getEndDate())).thenReturn(false);
-        Mockito.when(blockService.validateIfDatesAreAvailable(property.getId().toString(), blockId.toString(), blockCreateDto.getStartDate(), blockCreateDto.getEndDate())).thenThrow(new BadRequestException("Dates already booked"));
+        Mockito.when(reservationService.validateIfDatesAreAvailable(property.getId().toString(), null, blockId.toString(), blockCreateDto.getStartDate(), blockCreateDto.getEndDate())).thenThrow(new BadRequestException("Dates already booked"));
 
         var exception = assertThrows(BadRequestException.class, () -> blockService.updateBlock(blockCreateDto, blockId.toString()));
         assertEquals("Dates already booked", exception.getMessage());

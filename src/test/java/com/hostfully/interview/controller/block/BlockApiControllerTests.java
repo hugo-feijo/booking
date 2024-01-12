@@ -110,7 +110,7 @@ class BlockApiControllerTests {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("message", is("Dates already blocked")));
+                .andExpect(jsonPath("message", is("Dates are already blocked")));
     }
 
     @Test
@@ -138,7 +138,7 @@ class BlockApiControllerTests {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("message", is("Dates already booked")));
+                .andExpect(jsonPath("message", is("Dates are already booked")));
     }
 
     @Test
@@ -193,7 +193,7 @@ class BlockApiControllerTests {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("message", is("Dates already blocked")));
+                .andExpect(jsonPath("message", is("Dates are already blocked")));
     }
 
     @Test

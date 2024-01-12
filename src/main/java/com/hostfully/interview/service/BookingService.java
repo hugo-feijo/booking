@@ -16,28 +16,20 @@ import java.util.List;
 public class BookingService {
 
     private final PropertyService propertyService;
+    private final ReservationService reservationService;
     private final BookingRepository bookingRepository;
 
-    public BookingService(PropertyService propertyService, BookingRepository bookingRepository) {
+    public BookingService(PropertyService propertyService, ReservationService reservationService, BookingRepository bookingRepository) {
         this.propertyService = propertyService;
+        this.reservationService = reservationService;
         this.bookingRepository = bookingRepository;
     }
 
     public Booking createBooking(BookingCreateDto bookingCreateDto) {
         bookingCreateDto.validate();
         var booking = bookingCreateDtoToBooking(bookingCreateDto);
-        validateIfDatesAreAvailable(bookingCreateDto.getPropertyId(), null, bookingCreateDto.getStartDate(), bookingCreateDto.getEndDate());
+        reservationService.validateIfDatesAreAvailable(bookingCreateDto.getPropertyId(), bookingCreateDto.getStartDate(), bookingCreateDto.getEndDate());
         return saveBooking(booking);
-    }
-
-    public boolean validateIfDatesAreAvailable(String propertyId, String bookingId, LocalDate startDate, LocalDate endDate) {
-        var isBooked = bookingRepository.existByPropertyIdAndDateRange(propertyId, bookingId, startDate, endDate);
-
-        if(isBooked) {
-            throw new BadRequestException("Dates already booked");
-        }
-
-        return true;
     }
 
     public Booking bookingCreateDtoToBooking(BookingCreateDto bookingCreateDto) {
@@ -84,9 +76,8 @@ public class BookingService {
     public Booking rebookBooking(String bookingId) {
         var booking = getBooking(bookingId);
         validateBookingForRebooking(booking);
-        validateIfDatesAreAvailable(booking.getProperty().getId().toString(), booking.getId().toString(), booking.getStartDate(), booking.getEndDate());
+        reservationService.validateIfDatesAreAvailable(booking.getProperty().getId().toString(), booking.getId().toString(), null, booking.getStartDate(), booking.getEndDate());
 
-        //TODO: check for blocked dates
         booking.setStatus(BookingStatus.CONFIRMED); //TODO: space to improve, make host able to approve rebooking
         booking.setUpdateAt(LocalDate.now());
 
@@ -108,7 +99,7 @@ public class BookingService {
     public Booking updateBooking(String bookingId, BookingUpdateDto bookingUpdateDto) {
         bookingUpdateDto.validate();
         var booking = getBooking(bookingId);
-        validateIfDatesAreAvailable(booking.getProperty().getId().toString(), booking.getId().toString(), bookingUpdateDto.getStartDate(), bookingUpdateDto.getEndDate());
+        reservationService.validateIfDatesAreAvailable(booking.getProperty().getId().toString(), booking.getId().toString(), null, bookingUpdateDto.getStartDate(), bookingUpdateDto.getEndDate());
 
         booking.setStartDate(bookingUpdateDto.getStartDate());
         booking.setEndDate(bookingUpdateDto.getEndDate());
