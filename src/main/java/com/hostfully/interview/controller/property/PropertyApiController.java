@@ -1,8 +1,10 @@
 package com.hostfully.interview.controller.property;
 
 import com.hostfully.interview.model.dto.PropertyCreateDto;
+import com.hostfully.interview.model.entity.Block;
 import com.hostfully.interview.model.entity.Booking;
 import com.hostfully.interview.model.entity.Property;
+import com.hostfully.interview.service.BlockService;
 import com.hostfully.interview.service.BookingService;
 import com.hostfully.interview.service.PropertyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,10 +25,12 @@ public class PropertyApiController implements PropertyApi {
 
     private final PropertyService propertyService;
     private final BookingService bookingService;
+    private final BlockService blockService;
 
-    public PropertyApiController(PropertyService propertyService, BookingService bookingService) {
+    public PropertyApiController(PropertyService propertyService, BookingService bookingService, BlockService blockService) {
         this.propertyService = propertyService;
         this.bookingService = bookingService;
+        this.blockService = blockService;
     }
 
     @Override
@@ -60,5 +64,10 @@ public class PropertyApiController implements PropertyApi {
     @Override
     public List<Booking> getBookingsByPropertyId(String propertyId) {
         return bookingService.getBookingsByPropertyId(propertyId);
+    }
+
+    @Override
+    public List<Block> getBlocksByPropertyId(String propertyId) {
+        return blockService.getBlocksByPropertyId(propertyId);
     }
 }

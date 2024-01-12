@@ -2,6 +2,7 @@ package com.hostfully.interview.controller.property;
 
 import com.hostfully.interview.model.dto.ErrorInfoDto;
 import com.hostfully.interview.model.dto.PropertyCreateDto;
+import com.hostfully.interview.model.entity.Block;
 import com.hostfully.interview.model.entity.Booking;
 import com.hostfully.interview.model.entity.Property;
 import io.swagger.v3.oas.annotations.Operation;
@@ -59,4 +60,11 @@ public interface PropertyApi {
             @ApiResponse(responseCode = "400", description = "bad request", content = @Content(schema = @Schema(implementation = ErrorInfoDto.class)))})
     @GetMapping("/{id}/bookings")
     List<Booking> getBookingsByPropertyId(@Parameter(description="Property id") @PathVariable("id") String propertyId);
+
+    @Operation(summary = "Get all Blocks of a Property", description = "Find all blocks by propertyId", tags = {"block"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Block.class)))),
+            @ApiResponse(responseCode = "400", description = "bad request", content = @Content(schema = @Schema(implementation = ErrorInfoDto.class)))})
+    @GetMapping("/{id}/blocks")
+    List<Block> getBlocksByPropertyId(@Parameter(description="Property id") @PathVariable("id") String propertyId);
 }

@@ -7,6 +7,7 @@ import com.hostfully.interview.repository.BlockRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class BlockService {
@@ -47,5 +48,10 @@ public class BlockService {
     public void deleteBlock(String blockId) {
         var block = getBlock(blockId);
         blockRepository.delete(block);
+    }
+
+    public List<Block> getBlocksByPropertyId(String propertyId) {
+        var property = propertyService.getProperty(propertyId);
+        return blockRepository.findAllByProperty(property);
     }
 }

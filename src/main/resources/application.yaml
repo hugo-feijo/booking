@@ -8,9 +8,5 @@ spring:
     username: sa
     password: password
   jpa:
-    show-sql: true
+    show-sql: false
     defer-datasource-initialization: true
-
-logging:
-  level:
-    org.hibernate.orm.jdbc.bind: trace
